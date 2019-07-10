@@ -1,0 +1,14 @@
+
+<launch>
+	
+<!--
+	<include file="$(find df)/launch/xaxxon_lidar_mapping.launch" />	
+-->
+	<include file="$(find df)/launch/cartographer.launch" />	
+	
+	<node pkg="df" type="map_remote.py" name="map_remote" required="true" />
+
+
+</launch>
+
+

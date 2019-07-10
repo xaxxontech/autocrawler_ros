@@ -1,0 +1,8 @@
+<launch>
+	<node pkg="df" type="cmd_vel_listener.py" name="cmd_vel_listener" required="true" output="screen" >
+	</node>
+
+	<node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="keyboardop" required="true" output="screen" >
+	</node>	
+	
+</launch>

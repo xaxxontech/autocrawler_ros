@@ -1,0 +1,20 @@
+<launch>
+
+  <node name="webrtcrs" pkg="df" type="webrtcrs" output="screen" 
+	  args="--peer-id=777 --server='wss://xaxxon.com:8443'"
+	  required="true">
+    <remap from="image_raw" to="/camera/color/image_raw"/>
+  </node>
+	
+	<include file="$(find realsense2_camera)/launch/rs_camera.launch">
+		<arg name="enable_depth" value="false" />
+		<arg name="enable_fisheye" value="false" />
+		<arg name="enable_infra1" value="false"/>
+		<arg name="enable_infra2" value="false"/>
+		<arg name="color_width" value="640"/>
+		<arg name="color_height" value="480"/>
+		<arg name="enable_color" value="true"/>
+		<arg name="initial_reset" value="true"/>
+	</include>
+	
+</launch>

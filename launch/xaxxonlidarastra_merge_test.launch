@@ -1,0 +1,35 @@
+<launch>
+
+	<node pkg="tf" type="static_transform_publisher" name="base_to_xtion_broadcaster" 
+		args="-0.054 0.048 0.29 0 0 0 /base_link /camera_depth_frame 100" />
+		
+	<node pkg="tf" type="static_transform_publisher" name="base_to_xaxxon_lidar_broadcaster" 
+		args="-0.063 0.0 0.359 0 0 0 /base_link /laser_frame 100" /> 
+		
+	<node pkg="tf" type="static_transform_publisher" name="zorg_broadcaster" 
+		args="0 0 0 0 0 0 /base_link /zorg 100" /> 
+
+	<node pkg="xaxxon_openlidar" type="xaxxon_openlidar.py" name="xaxxon_openlidar" required="true" output="screen"> 
+		<param name="scan_topic" value="scan_lidar"/> 
+	</node>
+
+	<include file="$(find oculusprime)/launch/fake_laser.launch" >
+		<arg name="skipframes" value="2" />
+		<arg name="range_max" value="2.0" />
+		<arg name="scan_topic" default="scan_cam"/>
+		<arg name="use_device_time" value="false" /> 
+	</include>
+
+	<node pkg="ira_laser_tools" name="laserscan_multi_merger" type="laserscan_multi_merger" 
+		required="true" output="screen">
+		<param name="destination_frame" value="base_link"/>
+		<param name="cloud_destination_topic" value="merged_cloud"/>
+		<param name="scan_destination_topic" value="scan"/>
+		<param name="laserscan_topics" value ="scan_lidar scan_cam" />
+<!--
+		<param name="angle_max" value ="3.14" />
+		<param name="angle_min" value ="-3.14" />
+-->
+	</node>
+	
+</launch>

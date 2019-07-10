@@ -1,0 +1,8 @@
+<launch>
+
+	<include file="$(find df)/launch/xaxxon_lidar_globalpath_follow.launch" />
+	
+	<node pkg="df" type="remote_nav.py" name="remote_nav" required="true" />
+			
+
+</launch>
