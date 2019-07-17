@@ -293,6 +293,7 @@ on_negotiation_needed (GstElement * element, gpointer user_data)
 }
 
 #define STUN_SERVER " stun-server=stun://stun.l.google.com:19302 "
+#define TURN_SERVER " turn-server=turn://oculus:robot@127.0.0.1:3478 "
 #define RTP_CAPS_OPUS "application/x-rtp,media=audio,encoding-name=OPUS,payload="
 #define RTP_CAPS_VP8 "application/x-rtp,media=video,encoding-name=VP8,payload="
 
@@ -305,7 +306,7 @@ static gboolean start_pipeline (void)
 	pipe1 =
       gst_parse_launch ("videorate ! video/x-raw,width=640,height=480,framerate=8/1 ! "
       "videoconvert ! queue ! vp8enc deadline=1 ! rtpvp8pay ! "
-      "queue ! " RTP_CAPS_VP8 "96 ! webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER,
+      "queue ! " RTP_CAPS_VP8 "96 ! webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER TURN_SERVER,
       &error);
 
 	if (error) {
@@ -772,20 +773,6 @@ void startLoopAndConnect() {
 		
 }
 
-// gboolean attemptRestart() {
-	// retries ++;
-	// if (retries > MAXRETRIES) return FALSE;
-
-	// g_cancellable_cancel(serverConnection);
-	
-	// cleanup_and_quit_loop("attempt restart", APP_STATE_UNKNOWN); // shutdown GMainLoop
-	
-	// g_print("restarting loop\n");
-	// startLoopAndConnect();
-
-	// return TRUE;	
-// }
-
 void image_cb(const sensor_msgs::Image::ConstPtr &msg)
 {
 	// ROS_INFO("Image: %d x %d, stamp %f", msg->width, msg->height, msg->header.stamp.toSec());
@@ -805,22 +792,16 @@ void image_cb(const sensor_msgs::Image::ConstPtr &msg)
 }
 
 
-//int main (int argc, char *argv[])
-int main(int argc, char **argv) // added
+int main(int argc, char **argv) 
 {
 	// added
 	ros::init(argc, argv, "webrtcrs");
 	ros::NodeHandle n;
-	// signal(SIGINT, rosSigintHandler); // handle ROS shutdown 
 	
 	image_transport_.reset(new image_transport::ImageTransport(n));
 	ROS_INFO("INIT webrtcrs");
 
 	image_sub_ = image_transport_->subscribe("image_raw", 10, image_cb); 
-	
-	// ros::AsyncSpinner spinner(4);
-	// spinner.start();
-
 	
   GOptionContext *context;
   GError *error = NULL;
@@ -847,7 +828,7 @@ int main(int argc, char **argv) // added
     GstUri *uri = gst_uri_from_string (server_url);
     if (g_strcmp0 ("localhost", gst_uri_get_host (uri)) == 0 ||
         g_strcmp0 ("127.0.0.1", gst_uri_get_host (uri)) == 0)
-      disable_ssl = true;ros::Duration(0.5).sleep();
+      disable_ssl = true;
     gst_uri_unref (uri);
   }
 
@@ -869,13 +850,7 @@ int main(int argc, char **argv) // added
 			g_printerr("server connect failure, exit\n");
 			return -1;
 		}
-		
-		/* check if server connected */
-		// ros::Time timenow = ros::Time::now();
-		// if (timenow - start > ros::Duration(2) && !serverConnected) {
-			// if (!attemptRestart()) break;
-			// start = ros::Time::now();
-		// }
+
 	}
 	
 	// cleanup_and_quit_loop("ros shutdown", APP_STATE_UNKNOWN); // shutdown GMainLoop

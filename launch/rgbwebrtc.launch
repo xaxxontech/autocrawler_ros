@@ -1,8 +1,7 @@
 <launch>
 
   <node name="webrtcrs" pkg="df" type="webrtcrs" output="screen" 
-	  args="--peer-id=777 --server='wss://xaxxon.com:8443'"
-	  required="true">
+	  args="--peer-id=777" respawn="true">
     <remap from="image_raw" to="/camera/color/image_raw"/>
   </node>
 	
@@ -14,6 +13,7 @@
 		<arg name="color_width" value="640"/>
 		<arg name="color_height" value="480"/>
 		<arg name="enable_color" value="true"/>
+		<arg name="color_fps" value="15"/>
 		<arg name="initial_reset" value="true"/>
 	</include>
 	
