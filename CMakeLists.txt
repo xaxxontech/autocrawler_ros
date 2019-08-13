@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 	std_msgs
 	image_transport
 	sensor_msgs
+	pcl_ros
 )
 
 find_package(PkgConfig)
@@ -95,6 +96,16 @@ target_link_libraries(webrtcrs
 	#${catkin_LIBRARIES}
 	#${gst_LIBRARIES}
 #)
+
+# add_library(${PROJECT_NAME} src/pointcloudobstacles_to_scan.cpp)
+
+add_executable(pointcloudobstaclestoscan
+  src/pointcloudobstacles_to_scan.cpp
+)
+
+target_link_libraries(pointcloudobstaclestoscan
+	${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##

@@ -1,0 +1,76 @@
+<launch>
+
+	<!-- static transforms -->
+	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_realsense_broadcaster" 
+		args="0.152 0.012 0.163 0 0 0 base_link camera_link" />
+		
+	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
+		args="0.103 0.0 0.120 0 0 0 base_link laser_frame" /> 
+			
+			
+	<!-- lidar-->
+	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen">
+		<param name="masks" value="54 80  162 174  190 208  279 305"/>
+<!--
+		<param name="scan_topic" value="scan_lidar"/> 
+-->
+	</node>
+	
+	<!-- realsense depth and colour -->
+	<arg name="camera"                default="camera"/>
+	<include file="$(find realsense2_camera)/launch/rs_camera.launch">
+		<arg name="enable_infra1"     value="false"/>
+		<arg name="enable_infra2"     value="false"/>
+		<arg name="enable_fisheye"    value="true"/>
+		<arg name="enable_gyro"       value="false"/>
+		<arg name="enable_accel"      value="false"/>
+
+		<arg name="enable_depth"      value="true"/>
+		<arg name="depth_width"       value="640"/>
+		<arg name="depth_height"      value="480"/>
+		<arg name="depth_fps"         value="30"/>
+		
+		<arg name="enable_pointcloud" value="true"/>
+		<arg name="pointcloud_texture_stream" default="RS2_STREAM_ANY"/>
+
+		<arg name="enable_color"      value="true"/>
+		<arg name="color_width" value="640"/>
+		<arg name="color_height" value="480"/>
+		<arg name="color_fps" value="15"/>
+
+		<arg name="initial_reset" value="true"/>
+    </include>
+	
+	<!-- depthimage to laserscan -->
+<!--
+	<arg name="scan_topic" default="scan_cam"/>
+    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan" required="true" output="screen">
+		<param name="scan_height" value="5"/>
+		<param name="output_frame_id" value="camera_depth_frame"/>
+		<param name="range_min" value="0.45"/>
+		<param name="range_max" value="3.0"/>
+		<remap from="image" to="camera/depth/image_rect_raw"/>
+		<remap from="scan" to="$(arg scan_topic)"/>
+    </node>
+-->
+
+	<!-- scan merge -->
+<!--
+	<node pkg="ira_laser_tools" name="laserscan_multi_merger" type="laserscan_multi_merger" 
+		required="true" output="screen">
+		<param name="destination_frame" value="base_link"/>
+		<param name="cloud_destination_topic" value="merged_cloud"/>
+		<param name="scan_destination_topic" value="scan"/>
+		<param name="laserscan_topics" value ="scan_lidar scan_cam" />
+		<param name="angle_max" value ="3.14" />
+		<param name="angle_min" value ="-3.14" />
+		<param name="scan_time" value ="0.33333" />
+	</node>
+-->
+<!--
+	<node pkg="df" type="lidarrealsensemerge.py" name="lidarrealsensemerge" required="true" output="screen">
+		<param name="merged_scan_topic" value="scan"/> 
+	</node>
+-->
+	
+</launch>

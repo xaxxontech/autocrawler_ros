@@ -47,7 +47,7 @@ goalseek = False
 meterspersec = 0.33 # linear speed  
 radianspersec = 1.496 # 1.496 = 0.0857degrees per ms
 
-dpmthreshold = 1.2 # maximum to allow arcturn, radians per meter
+dpmthreshold = 0.9 # maximum to allow arcturn, radians per meter
 tfx = 0
 tfy = 0
 tfth = 0

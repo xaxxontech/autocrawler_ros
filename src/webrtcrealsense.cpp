@@ -66,12 +66,14 @@ static int retries = 0;
 static const int MAXRETRIES = 5;
 gboolean serverConnected = FALSE;
 gboolean serverConnectStarted = FALSE;
+static const gchar *audio_device = nullptr;
 
 static GOptionEntry entries[] =
 {
   { "peer-id", 0, 0, G_OPTION_ARG_STRING, &peer_id, "String ID of the peer to connect to", "ID" },
   { "server", 0, 0, G_OPTION_ARG_STRING, &server_url, "Signalling server to connect to", "URL" },
   { "disable-ssl", 0, 0, G_OPTION_ARG_NONE, &disable_ssl, "Disable ssl", NULL },
+  { "audio-device", 0, 0, G_OPTION_ARG_STRING, &audio_device, "String of the audio device number", "ID" },
   { NULL },
 };
 
@@ -303,11 +305,25 @@ static gboolean start_pipeline (void)
   GstStateChangeReturn ret;
   GError *error = NULL;
 
-	pipe1 =
-      gst_parse_launch ("videorate ! video/x-raw,width=640,height=480,framerate=8/1 ! "
-      "videoconvert ! queue ! vp8enc deadline=1 ! rtpvp8pay ! "
-      "queue ! " RTP_CAPS_VP8 "96 ! webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER TURN_SERVER,
-      &error);
+	if(!audio_device) {
+		pipe1 =
+		  gst_parse_launch ("webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER TURN_SERVER
+		  "videorate ! video/x-raw,width=640,height=480,framerate=15/1 ! "
+		  "videoconvert ! queue ! vp8enc deadline=1 target-bitrate=256000 ! rtpvp8pay ! "
+		  "queue ! " RTP_CAPS_VP8 "96 ! sendrecv. ",
+		  &error);
+    }
+    else {  
+		gchar *pl = g_strconcat ("webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER TURN_SERVER
+			"videorate ! video/x-raw,width=640,height=480,framerate=15/1 ! "
+			"videoconvert ! queue ! vp8enc deadline=1 target-bitrate=256000 ! rtpvp8pay ! "
+			"queue ! " RTP_CAPS_VP8 "96 ! sendrecv. "
+			"alsasrc device=hw:", audio_device, " ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
+			"queue ! " RTP_CAPS_OPUS "97 ! sendrecv. ", NULL);
+
+		pipe1 =	gst_parse_launch (pl, &error);
+		g_free(pl);
+	}
 
 	if (error) {
 		g_printerr ("Failed to parse launch: %s\n", error->message);
@@ -332,7 +348,6 @@ static gboolean start_pipeline (void)
 			"max-bytes", 0,
 			"do-timestamp", true,
 			NULL);
-			
 
 	// find pipeline sink (where we may link appsrc)
 	GstPad *inpad = gst_bin_find_unlinked_pad(GST_BIN(pipe1), GST_PAD_SINK);
@@ -453,8 +468,9 @@ static void
 on_server_closed (SoupWebsocketConnection * conn G_GNUC_UNUSED,
     gpointer user_data G_GNUC_UNUSED)
 {
-  app_state = SERVER_CLOSED;
-  cleanup_and_quit_loop ("Server connection closed", APP_STATE_UNKNOWN);
+	app_state = SERVER_CLOSED;
+	// cleanup_and_quit_loop ("Server connection closed", APP_STATE_UNKNOWN);
+	g_print ("Server connection closed, trying to continue anyway\n");
 }
 
 /* One mega message handler for our asynchronous calling mechanism */
@@ -831,8 +847,6 @@ int main(int argc, char **argv)
       disable_ssl = true;
     gst_uri_unref (uri);
   }
-
-	// startLoopAndConnect();
 
 	double start = 0;
 	
