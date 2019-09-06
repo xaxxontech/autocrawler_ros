@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 	rospy
 	std_msgs
 	image_transport
+	image_geometry
 	sensor_msgs
 	pcl_ros
 )
@@ -102,8 +103,14 @@ target_link_libraries(webrtcrs
 add_executable(pointcloudobstaclestoscan
   src/pointcloudobstacles_to_scan.cpp
 )
-
 target_link_libraries(pointcloudobstaclestoscan
+	${catkin_LIBRARIES}
+)
+
+add_executable(depthcamtoscan
+  src/depthcamtoscan.cpp
+)
+target_link_libraries(depthcamtoscan
 	${catkin_LIBRARIES}
 )
 

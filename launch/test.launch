@@ -1,4 +1,9 @@
 <launch>
+	
+	<!-- static transforms -->
+	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_realsense_broadcaster" 
+		args="0.152 0.012 0.163 0 0 0 base_link camera_link" />
+		
 	<!-- realsense depth and colour -->
 	<arg name="camera"                default="camera"/>
 	<include file="$(find realsense2_camera)/launch/rs_camera.launch">
@@ -9,9 +14,10 @@
 		<arg name="enable_accel"      value="false"/>
 
 		<arg name="enable_depth"      value="true"/>
-		<arg name="depth_width"       value="640"/>
-		<arg name="depth_height"      value="480"/>
+		<arg name="depth_width"       value="480"/>
+		<arg name="depth_height"      value="270"/>
 		<arg name="depth_fps"         value="30"/>
+		<arg name="clip_distance"	value="3.0"/>
 		
 		<arg name="enable_pointcloud" value="true"/>
 		<arg name="pointcloud_texture_stream" default="RS2_STREAM_ANY"/>
@@ -23,4 +29,27 @@
 
 		<arg name="initial_reset" value="true"/>
     </include>
+
+<!--
+	<node pkg="df" type="pointcloudobstaclestoscan" name="pointcloudobstaclestoscan" output="screen"/>
+-->
+
+
+<!--
+	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
+		args="0.103 0.0 0.120 0.6195919 0 0 base_link laser_frame" /> 
+-->
+			
+	<!-- lidar-->
+<!--
+	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen">
+		<param name="masks" value="21.5 47.5 129.5 141.5 157.5 175.5 246.5 272.5"/>
+		<param name="scan_topic" value="scan"/> 
+		<param name="forward_offset" value="221.5"/>
+	</node>
+-->
+
+	<node pkg="df" type="depthcamtoscan" name="depthcamtoscan" output="screen"/>
+
+	
 </launch>

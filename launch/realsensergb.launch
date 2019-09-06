@@ -14,7 +14,7 @@
 		<arg name="color_height" value="480"/>
 		<arg name="color_fps" value="15"/>
 
-		<arg name="initial_reset" value="true"/>
+		<arg name="initial_reset" value="false"/>
     </include>
 
 </launch>
