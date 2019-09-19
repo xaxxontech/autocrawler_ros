@@ -26,7 +26,7 @@ const float HRZCALINC = 0.00576; // 0.33 deg
 const int CALIBFRAMESMAX = 5;
 int framecount = 0;
 const int DROPINITFRAMES = 30;
-const float CALIBCONST = -0.03; // horiz_angle_offset_ distortion comp?
+const float CALIBCONST = -0.02; // horiz_angle_offset_ distortion comp
 
 
 bool use_point(const float new_value, const float old_value, 
@@ -265,7 +265,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "depthcamtoscan");
 	ros::NodeHandle nh;
 
-	pub = nh.advertise<sensor_msgs::LaserScan>("scan", 1);
+	pub = nh.advertise<sensor_msgs::LaserScan>("scan_cam", 1);
 
 	image_transport::ImageTransport it(nh);
 	image_transport::CameraSubscriber sub = it.subscribeCamera("/camera/depth/image_rect_raw", 1, imageCb);

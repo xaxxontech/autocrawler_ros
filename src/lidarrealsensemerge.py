@@ -86,7 +86,7 @@ camscans = []
 camrangeslength = -1 	# should be constant, set once only
 lidarrangeslength = -1 	# should be constant, set once only 
 camanglestart = 0		# should be constant, set once only 
-ANGINC = 0.006
+ANGINC = 0.006   		# 0.344 deg
 NUMPOINTS = int((math.pi*2)/ANGINC)  # 1047
 
 
@@ -113,8 +113,8 @@ def mergescans(lidarscandata):
 	while angle <= mergedscan.angle_max:
 		
 		distance = 0.0
-		distance = checklidarscan(angle, lidarscandata)
-		distcam = checkcamscan(angle)
+		distance = getlidarscan(angle, lidarscandata)
+		distcam = getcamscan(angle)
 		if not distcam == 0.0:
 			distance = distcam
 			
@@ -125,29 +125,43 @@ def mergescans(lidarscandata):
 	camscans = []
 	
 	
-def checklidarscan(angle, scan):
+def getlidarscan(angle, scan):
+	
+	""" comp for lidar header rotation """
+	#  angle = angle + (camanglestart - math.pi*2)
+	#  if angle >= math.pi*2:
+		#  angle = angle - math.pi*2
 	
 	if angle <= scan.angle_max:
 		lidarindex = int(angle/scan.angle_increment)
 		lidarangle = lidarindex * scan.angle_increment
-		if abs(angle - lidarangle) <= ANGINC/2:
+		if abs(angle - lidarangle) < ANGINC * 0.666:  # <= ANGINC/2:
 			return scan.ranges[lidarindex]
 			
 	return 0
 	
 	
-def checkcamscan(angle):
+def getcamscan(angle):
 	
 	if angle <= camscans[0].angle_max:
 		indexangle = angle - camscans[0].angle_min
-		scannum = 0 # use 1st scan
+		#  scannum = 1 # use 2nd scan to match time, when rotated
+		scannum = 0
+
 	elif angle >= camanglestart:
-		indexangle = angle - (math.pi + camscans[0].angle_min)
+		indexangle = angle - (math.pi*2 + camscans[0].angle_min)
+		#  scannum = 0 # use 1st scan, when rotate
 		scannum = len(camscans)-1 # use last scan
+				
 	else:
 		return 0.0
 
 	index = int(round( (indexangle/(camscans[0].angle_max - camscans[0].angle_min)) * camrangeslength ))
+	#  print "index: "+str(index)+", camrangeslength: "+ str(camrangeslength)
+	
+	if index >= camrangeslength:
+		return 0.0
+		
 	distance = camscans[scannum].ranges[index]
 	if math.isnan(distance):  # cam non readings are nan
 		distance = 0.0
@@ -172,7 +186,7 @@ def camScanCallback(data):
 	
 	if camrangeslength == -1: # set once
 		camrangeslength = len(data.ranges)
-		camanglestart = math.pi*2 - data.angle_min
+		camanglestart = math.pi*2 + data.angle_min
 
 	camscans.append(data)
 
@@ -184,6 +198,5 @@ rospy.loginfo("lidarrealsensemerge init")
 scan_pub = rospy.Publisher(rospy.get_param('~merged_scan_topic', 'scan'), LaserScan, queue_size=3)
 rospy.Subscriber(rospy.get_param('~lidar_scan_topic', 'scan_lidar'), LaserScan, lidarScanCallback) 
 rospy.Subscriber(rospy.get_param('~camera_scan_topic', 'scan_cam'), LaserScan, camScanCallback) 
-#  rospy.Subscriber("scan", LaserScan, scanCallback) # testing only
 
 rospy.spin()
