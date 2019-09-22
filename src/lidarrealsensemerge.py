@@ -88,14 +88,15 @@ lidarrangeslength = -1 	# should be constant, set once only
 camanglestart = 0		# should be constant, set once only 
 ANGINC = 0.006   		# 0.344 deg
 NUMPOINTS = int((math.pi*2)/ANGINC)  # 1047
-
+scansmerged = False
+CAMCOMP = 1.08 			# scale cam points to match <=2m lidar points
 
 def cleanup():
 	pass
 	
 	
 def mergescans(lidarscandata):
-	global camscans
+	global camscans, scansmerged
 	
 	mergedscan = LaserScan()
 	mergedscan.header.stamp = lidarscandata.header.stamp
@@ -122,7 +123,7 @@ def mergescans(lidarscandata):
 		angle += ANGINC
 
 	scan_pub.publish(mergedscan)
-	camscans = []
+	camscans=[]
 	
 	
 def getlidarscan(angle, scan):
@@ -145,13 +146,13 @@ def getcamscan(angle):
 	
 	if angle <= camscans[0].angle_max:
 		indexangle = angle - camscans[0].angle_min
-		#  scannum = 1 # use 2nd scan to match time, when rotated
+		#  scannum = 1 # use early scan to match time, when rotated
 		scannum = 0
 
 	elif angle >= camanglestart:
 		indexangle = angle - (math.pi*2 + camscans[0].angle_min)
 		#  scannum = 0 # use 1st scan, when rotate
-		scannum = len(camscans)-1 # use last scan
+		scannum = len(camscans)-2 # use later scan to match time
 				
 	else:
 		return 0.0
@@ -165,6 +166,8 @@ def getcamscan(angle):
 	distance = camscans[scannum].ranges[index]
 	if math.isnan(distance):  # cam non readings are nan
 		distance = 0.0
+		
+	distance = distance * CAMCOMP
 
 	return distance
 

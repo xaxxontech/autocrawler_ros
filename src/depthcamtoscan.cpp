@@ -11,7 +11,7 @@
 ros::Publisher pub;
 
 double camFOVy;
-const float image_ignore_ratio_ = 0.4; // 0.675; // 0.675; // top of image ignore this ratio
+const float image_ignore_ratio_ = 0.6; // 0.675; // top of image ignore this ratio
 const float frame_z_ = 0.163;
 const double floorplane_obstacle_height_ = 0.04; // 0.075
 const double floorplane_cliff_depth_ = 0.5; // 0.075

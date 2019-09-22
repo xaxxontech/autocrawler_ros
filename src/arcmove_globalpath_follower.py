@@ -17,7 +17,7 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 from actionlib_msgs.msg import GoalStatusArray
 from move_base_msgs.msg import MoveBaseActionGoal
 
-listentime = 0.6 # allows odom + amcl to catch up
+listentime = 0.6 # 0.6 # allows odom + amcl to catch up
 nextmove = 0
 odomx = 0
 odomy = 0
@@ -206,11 +206,8 @@ def arcmove(ox, oy, oth, gpx, gpy, gpth, gth, lpx, lpy, lpth):
 	# if making large turns-in-place, wait, let planner stabilize
 	if abs(dth) > 1.57 and not goalrotate and not initialturn and waitonaboutface < 1: 
 		if goalDistance() > 0.9: # skip if close to goal
-			# oculusprimesocket.clearIncoming()
-			# oculusprimesocket.sendString("forward 0.25")
-			# oculusprimesocket.waitForReplySearch("<state> direction stop")
 			waitonaboutface += 1 # only do this once
-			rospy.sleep(1.5)
+			rospy.sleep(1.0)  # 1.5
 			nextmove = rospy.get_time() + listentime
 			return
 	waitonaboutface = 0

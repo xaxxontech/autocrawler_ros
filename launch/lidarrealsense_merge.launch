@@ -38,7 +38,7 @@
 		<arg name="depth_width"       value="480"/>
 		<arg name="depth_height"      value="270"/>
 		<arg name="depth_fps"         value="30"/>
-		<arg name="clip_distance"	value="2.0"/>
+		<arg name="clip_distance"	value="2.5"/>
 		
 		<arg name="enable_pointcloud" value="true"/>
 		<arg name="pointcloud_texture_stream" default="RS2_STREAM_ANY"/>
