@@ -4,92 +4,16 @@ import rospy, tf
 import math
 from sensor_msgs.msg import LaserScan
 
-"""
-scan_cam:
-header: 
-  seq: 802
-  stamp: 
-    secs: 1565150605
-    nsecs: 374808073
-  frame_id: "camera_depth_frame"
-angle_min: -0.480906009674
-angle_max: 0.451981693506
-angle_increment: 0.00145991810132
-time_increment: 0.0
-scan_time: 0.0329999998212
-range_min: 0.449999988079
-range_max: 3.0
-ranges: [   length = 640
-
-$ rostopic echo /camera/depth/camera_info
-header: 
-  seq: 569
-  stamp: 
-    secs: 1565200346
-    nsecs: 229034185
-  frame_id: "camera_depth_optical_frame"
-height: 480
-width: 640
-distortion_model: "plumb_bob"
-D: [0.0, 0.0, 0.0, 0.0, 0.0]
-K: [634.3914794921875, 0.0, 307.9980163574219, 0.0, 634.3914794921875, 240.6433563232422, 0.0, 0.0, 1.0]
-R: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
-P: [634.3914794921875, 0.0, 307.9980163574219, 0.0, 0.0, 634.3914794921875, 240.6433563232422, 0.0, 0.0, 0.0, 1.0, 0.0]
-binning_x: 0
-binning_y: 0
-roi: 
-  x_offset: 0
-  y_offset: 0
-  height: 0
-  width: 0
-  do_rectify: False
-
-
-
-scan_lidar:
-header: 
-  seq: 355
-  stamp: 
-    secs: 1565148019
-    nsecs: 125879953
-  frame_id: "laser_frame"
-angle_min: 0.0
-angle_max: 6.11640310287
-angle_increment: 0.0263638067991
-time_increment: 0.00139800005127
-scan_time: 0.325733989477
-range_min: 0.5
-range_max: 40.0
-ranges: [ length = 233
-
-save 1st cam scan since last lidar scan, and last
-use 1/2 of 1st scan for 0-32.5 deg, 1/2 of 2nd scan for 327.5-360 
-
-scan: (merged by ira_laser_tools)
-header: 
-  seq: 53
-  stamp: 
-    secs: 1565195917
-    nsecs: 176195098
-  frame_id: "base_link"
-angle_min: -3.1400001049
-angle_max: 3.1400001049
-angle_increment: 0.00579999992624
-time_increment: 0.0
-scan_time: 0.333330005407
-range_min: 0.449999988079
-range_max: 25.0
-ranges: [  length = 1083
-"""
 
 camscans = []
 camrangeslength = -1 	# should be constant, set once only
 lidarrangeslength = -1 	# should be constant, set once only 
 camanglestart = 0		# should be constant, set once only 
-ANGINC = 0.006   		# 0.344 deg
-NUMPOINTS = int((math.pi*2)/ANGINC)  # 1047
+ANGINC = 0.012   		#  0.006 0.344 deg
+NUMPOINTS = int((math.pi*2)/ANGINC)  # 523
 scansmerged = False
 CAMCOMP = 1.08 			# scale cam points to match <=2m lidar points
+
 
 def cleanup():
 	pass
@@ -136,7 +60,7 @@ def getlidarscan(angle, scan):
 	if angle <= scan.angle_max:
 		lidarindex = int(angle/scan.angle_increment)
 		lidarangle = lidarindex * scan.angle_increment
-		if abs(angle - lidarangle) < ANGINC * 0.666:  # <= ANGINC/2:
+		if abs(angle - lidarangle) < ANGINC:  # <= ANGINC*0.666:
 			return scan.ranges[lidarindex]
 			
 	return 0

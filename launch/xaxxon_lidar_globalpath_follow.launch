@@ -18,7 +18,14 @@
 	</node>	
 -->
 
-	<include file="$(find df)/launch/lidarrealsense_merge.launch" />
+	<arg name="color_width" default="640"/>
+	<arg name="color_height" default="480"/>
+	<arg name="color_fps" default="15"/>
+	<include file="$(find df)/launch/lidarrealsense_merge.launch">
+		<arg name="color_width"       value="$(arg color_width)"/>
+		<arg name="color_height"      value="$(arg color_height)"/>
+		<arg name="color_fps"      value="$(arg color_fps)"/>
+	</include>
 
 	<node pkg="df" type="arcmove_globalpath_follower.py" name="arcmove_globalpath_follower" output="screen"
 		required="true" /> 

@@ -67,6 +67,9 @@ static const int MAXRETRIES = 5;
 gboolean serverConnected = FALSE;
 gboolean serverConnectStarted = FALSE;
 static const gchar *audio_device = nullptr;
+static const gchar *video_width = nullptr; 
+static const gchar *video_height = nullptr; 
+static const gchar *video_bitrate = nullptr; 
 
 static GOptionEntry entries[] =
 {
@@ -74,6 +77,9 @@ static GOptionEntry entries[] =
   { "server", 0, 0, G_OPTION_ARG_STRING, &server_url, "Signalling server to connect to", "URL" },
   { "disable-ssl", 0, 0, G_OPTION_ARG_NONE, &disable_ssl, "Disable ssl", NULL },
   { "audio-device", 0, 0, G_OPTION_ARG_STRING, &audio_device, "String of the audio device number", "ID" },
+  { "video-width", 0, 0, G_OPTION_ARG_STRING, &video_width, "video width pixels", NULL },
+  { "video-height", 0, 0, G_OPTION_ARG_STRING, &video_height, "video height pixels", NULL },
+  { "video-bitrate", 0, 0, G_OPTION_ARG_STRING, &video_bitrate, "target bitrate kbps", NULL },
   { NULL },
 };
 
@@ -310,17 +316,18 @@ static gboolean start_pipeline (void)
   GError *error = NULL;
 
 	if(!audio_device) {
-		pipe1 =
-		  gst_parse_launch ("webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER TURN_SERVER
-		  "videorate ! video/x-raw,width=640,height=480,framerate=15/1 ! "
-		  "videoconvert ! queue ! vp8enc deadline=1 target-bitrate=256000 ! rtpvp8pay ! "
-		  "queue ! " RTP_CAPS_VP8 "96 ! sendrecv. ",
-		  &error);
+		gchar *pl = g_strconcat ("webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER TURN_SERVER
+			"videorate ! video/x-raw,width=", video_width, ",height=", video_height, ",framerate=15/1 ! "
+			"videoconvert ! queue ! vp8enc deadline=1 target-bitrate=", video_bitrate, "000 ! rtpvp8pay ! "
+			"queue ! " RTP_CAPS_VP8 "96 ! sendrecv. ", NULL);
+			
+		pipe1 =	gst_parse_launch (pl, &error);
+		g_free(pl);
     }
     else {  
 		gchar *pl = g_strconcat ("webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER TURN_SERVER
-			"videorate ! video/x-raw,width=640,height=480,framerate=15/1 ! "
-			"videoconvert ! queue ! vp8enc deadline=1 target-bitrate=256000 ! rtpvp8pay ! "
+			"videorate ! video/x-raw,width=", video_width, ",height=", video_height, ",framerate=15/1 ! "
+			"videoconvert ! queue ! vp8enc deadline=1 target-bitrate=", video_bitrate, "000 ! rtpvp8pay ! "
 			"queue ! " RTP_CAPS_VP8 "96 ! sendrecv. "
 			"alsasrc device=hw:", audio_device, " ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
 			"queue ! " RTP_CAPS_OPUS "97 ! sendrecv. ", NULL);

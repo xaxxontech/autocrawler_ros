@@ -1,17 +1,15 @@
 #include <ros/ros.h>
-
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/LaserScan.h>
 #include <image_geometry/pinhole_camera_model.h>
-
 #include <iostream>
 
 
 ros::Publisher pub;
 
 double camFOVy;
-const float image_ignore_ratio_ = 0.6; // 0.675; // top of image ignore this ratio
+const float image_ignore_ratio_ = 0.0; // 0.675; // top of image ignore this ratio
 const float frame_z_ = 0.163;
 const double floorplane_obstacle_height_ = 0.04; // 0.075
 const double floorplane_cliff_depth_ = 0.5; // 0.075
@@ -27,6 +25,8 @@ const int CALIBFRAMESMAX = 5;
 int framecount = 0;
 const int DROPINITFRAMES = 30;
 const float CALIBCONST = -0.02; // horiz_angle_offset_ distortion comp
+const int SKIPY = 2;
+const int SKIPX = 2;
 
 
 bool use_point(const float new_value, const float old_value, 
@@ -109,7 +109,7 @@ sensor_msgs::LaserScanPtr get_scan_msg(const sensor_msgs::ImageConstPtr& depth_m
 	sensor_msgs::LaserScanPtr scan_msg(new sensor_msgs::LaserScan());
 	scan_msg->header = depth_msg->header;
 
-	scan_msg->header.frame_id = "camera_depth_frame"; // TODO: config set
+	scan_msg->header.frame_id = "camera_depth_frame"; // TODO: config/arg set
 
 	scan_msg->angle_min = angle_min;
 	scan_msg->angle_max = angle_max;
@@ -133,7 +133,7 @@ void imageCb(const sensor_msgs::ImageConstPtr& depth_msg,
 	   
 	if (framecount < DROPINITFRAMES) {
 		framecount++;
-		std::cout << "skip init frame: " << framecount << "\n";
+		// std::cout << "skip init frame: " << framecount << "\n";
 		return;
 	}
 
@@ -180,12 +180,10 @@ void imageCb(const sensor_msgs::ImageConstPtr& depth_msg,
 		
 		for (int v = vfpstart; v < vmax; v++, depth_row += row_step) { 
 
-			if ( !(v % 2) && !framecalibrated ) continue; // floor plane skip 50% vert pixels reduce cpu
+			if ( !(v % SKIPY) ) continue; // && !framecalibrated floor plane skip 50% vert pixels reduce cpu
 
-			for (int u = 0; u < (int) depth_msg->width; u++) { 
+			for (int u = 0; u < (int) depth_msg->width; u+=SKIPX) { 
 
-				// if (v >= vfpstart && !(u % 4) ) continue; // floor plane skip 75% horiz pixels reduce cpu
-						
 				uint16_t depth = depth_row[u];
 
 				double r = depth; // Assign to pass through NaNs and Infs
@@ -229,7 +227,7 @@ void imageCb(const sensor_msgs::ImageConstPtr& depth_msg,
 		}
 		
 		if (!framecalibrated) {
-			std::cout << "hrzangleoffst: " << hrzangleoffst << ", frameFPcount: " << frameFPcount << "\n";
+			// std::cout << "hrzangleoffst: " << hrzangleoffst << ", frameFPcount: " << frameFPcount << "\n";
 
 			
 			hrzangleoffst += HRZCALINC;
@@ -239,7 +237,7 @@ void imageCb(const sensor_msgs::ImageConstPtr& depth_msg,
 				avghrzangleoffst += winnerhrzangleoffst;
 				calibrationscancount ++;
 				
-				std::cout << "frame calibrated: " << winnerhrzangleoffst << "\n";
+				std::cout << "frame calibrated: " << winnerhrzangleoffst + CALIBCONST << "\n";
 				std::cout << "maxframeFPcount: " << maxframeFPcount << "\n";
 				
 				if (calibrationscancount >= CALIBFRAMESMAX) {

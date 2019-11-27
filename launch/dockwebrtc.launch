@@ -16,10 +16,14 @@
 		<param name="camera_info_url" value="file://$(find df)/dockcam_ost.yaml"/>
 	</node>
 
+	
 	<node name="webrtcrs" pkg="df" type="webrtcrs" output="screen" 
-		  args="--peer-id=777" respawn="true">
+		  args="--peer-id=777 --video-width=640 
+			--video-height=480 --video-bitrate=256" 
+		  respawn="true">
 		<remap from="image_raw" to="/usb_cam/image_raw"/>
 	</node>
+
 	
 	<arg name="camera" default="/usb_cam"/>
 	<arg name="image" default="image_raw"/>
