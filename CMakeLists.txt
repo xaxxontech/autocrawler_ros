@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(df)
+project(autocrawler)
 
 # Compile as C++11, supported in ROS Kinetic and newer
  add_compile_options(-std=c++11)
@@ -46,7 +46,7 @@ pkg_check_modules(jsonglib json-glib-1.0)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-  #LIBRARIES df
+  #LIBRARIES autocrawler
   #CATKIN_DEPENDS roscpp rospy std_msgs image_transport sensor_msgs
   #DEPENDS gst gstsdp gstwebrtc libsoup jsonglib
 )

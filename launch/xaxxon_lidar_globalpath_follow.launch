@@ -4,46 +4,39 @@
 	<param name="robot_description" textfile="$(find oculusprime)/description/oculusprime.urdf" />
 -->
 
-	<node pkg="df" type="odom_tf.py" name="odom_tf" required="true" output="screen" >
+	<node pkg="autocrawler" type="odom_tf.py" name="odom_tf" required="true" output="screen" >
 		<param name="odom_lag" value="0.035"/> 
 	</node>
 
-<!--
-	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
-	args="0.103 0.0 0.120 0 0 0 base_link laser_frame" /> 
 
-	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen">
-		<param name="masks" value="54 80  162 174  190 208  279 305"/>
-		<param name="dropscan_turnrate" value="0"/>
-	</node>	
--->
-
+	<!-- lidar and realsense -->
 	<arg name="color_width" default="640"/>
 	<arg name="color_height" default="480"/>
 	<arg name="color_fps" default="15"/>
-	<include file="$(find df)/launch/lidarrealsense_merge.launch">
+	<include file="$(find autocrawler)/launch/lidarrealsense_merge.launch">
 		<arg name="color_width"       value="$(arg color_width)"/>
 		<arg name="color_height"      value="$(arg color_height)"/>
 		<arg name="color_fps"      value="$(arg color_fps)"/>
 	</include>
 
-	<node pkg="df" type="arcmove_globalpath_follower.py" name="arcmove_globalpath_follower" output="screen"
+
+	<node pkg="autocrawler" type="arcmove_globalpath_follower.py" name="arcmove_globalpath_follower" output="screen"
 		required="true" /> 
 
 	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" required="true">
-		<rosparam file="$(find df)/params/xaxxon_lidar_costmap_common_params.yaml" command="load" ns="global_costmap" />
-		<rosparam file="$(find df)/params/xaxxon_lidar_costmap_common_params.yaml" command="load" ns="local_costmap" />
-		<rosparam file="$(find df)/params/xaxxon_lidar_local_costmap_params.yaml" command="load" />
-		<rosparam file="$(find df)/params/global_costmap_params.yaml" command="load" />
-		<rosparam file="$(find df)/params/global_planner_params.yaml" command="load" />
-		<rosparam file="$(find df)/params/dwa_local_planner_params.yaml" command="load" />
-		<rosparam file="$(find df)/params/xaxxon_lidar_move_base_params.yaml" command="load" />
+		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_costmap_common_params.yaml" command="load" ns="global_costmap" />
+		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_costmap_common_params.yaml" command="load" ns="local_costmap" />
+		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_local_costmap_params.yaml" command="load" />
+		<rosparam file="$(find autocrawler)/params/global_costmap_params.yaml" command="load" />
+		<rosparam file="$(find autocrawler)/params/global_planner_params.yaml" command="load" />
+		<rosparam file="$(find autocrawler)/params/dwa_local_planner_params.yaml" command="load" />
+		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_move_base_params.yaml" command="load" />
 	</node>
 	
 	<arg name="map" default="map.yaml" />
-	<node name="map_server" pkg="map_server" type="map_server" args="$(find df)/maps/$(arg map)"
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find autocrawler)/maps/$(arg map)"
 		required="true" />
 
-	<include file="$(find df)/launch/amcl.launch" />
+	<include file="$(find autocrawler)/launch/amcl.launch" />
 
 </launch>

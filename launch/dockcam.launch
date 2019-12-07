@@ -3,7 +3,7 @@
 	<node pkg="tf" type="static_transform_publisher" name="base_to_dockcam_broadcaster" 
 		args="-0.157 -0.003 0.080 3.14159 0 0 /base_link /dockcam 100" />
 		
-	<node pkg="df" type="docktargettostate.py" name="docktargettostate" required="true" output="screen"/>
+	<node pkg="autocrawler" type="docktargettostate.py" name="docktargettostate" required="true" output="screen"/>
 
 	<arg name="dockdevice" default="/dev/video3" />
 	<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" required="true" >
@@ -13,7 +13,7 @@
 		<param name="pixel_format" value="yuyv" />
 		<param name="camera_frame_id" value="usb_cam" />
 		<param name="io_method" value="mmap"/>
-		<param name="camera_info_url" value="file://$(find df)/dockcam_ost.yaml"/>
+		<param name="camera_info_url" value="file://$(find autocrawler)/dockcam_ost.yaml"/>
 	</node>
 
 	<node name="gst_video_server" pkg="gst_video_server" type="server_node" output="screen"
@@ -24,7 +24,7 @@
              videoconvert ! 
              avenc_flv bitrate=500000 ! 
              flvmux ! 
-             rtmpsink location='rtmp://127.0.0.1:1935/oculusPrime/stream1 live=1'
+             rtmpsink location='rtmp://127.0.0.1:1935/autocrawler/stream1 live=1'
         </rosparam>
 		<remap from="image_raw" to="/usb_cam/image_raw"/>
 	</node>

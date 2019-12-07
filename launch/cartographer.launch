@@ -1,7 +1,9 @@
 <launch>
 	
-	<node pkg="df" type="odom_tf.py" name="odom_tf" required="true" output="screen" >
+	<node pkg="autocrawler" type="odom_tf.py" name="odom_tf" required="true" output="screen" >
+<!--
 		<param name="odom_lag" value="0.035"/> 
+-->
 	</node>
 	
 	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
@@ -10,12 +12,12 @@
 	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen">
 		<param name="masks" value="54 80  162 174  190 208  279 305"/>
 		<param name="dropscan_turnrate" value="0"/>
-		<param name="rpm" value="180"/>
+		<param name="scan_topic" value="scan"/> 
 	</node>	
 
 	<node name="cartographer_node" pkg="cartographer_ros"
 		  type="cartographer_node" args="
-			  -configuration_directory $(find df)/cartographer_cfg
+			  -configuration_directory $(find autocrawler)/cartographer_cfg
 			  -configuration_basename 2d_testing.lua"
 		  output="screen" required="true">
 	</node>

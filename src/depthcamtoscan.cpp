@@ -120,7 +120,7 @@ sensor_msgs::LaserScanPtr get_scan_msg(const sensor_msgs::ImageConstPtr& depth_m
 	scan_msg->range_max = 3.0;
 	
 	// Calculate and fill the ranges
-	uint32_t ranges_size = depth_msg->width;
+	uint32_t ranges_size = depth_msg->width+1;
 	scan_msg->ranges.assign(ranges_size, std::numeric_limits<float>::quiet_NaN());
 
 	return scan_msg;
@@ -130,13 +130,15 @@ sensor_msgs::LaserScanPtr get_scan_msg(const sensor_msgs::ImageConstPtr& depth_m
 /* extract data from depth image */
 void imageCb(const sensor_msgs::ImageConstPtr& depth_msg, 
    const sensor_msgs::CameraInfoConstPtr& info_msg) {
-	   
+	
+	// skip initial frames to ensure stable image, good calibration    
 	if (framecount < DROPINITFRAMES) {
 		framecount++;
 		// std::cout << "skip init frame: " << framecount << "\n";
 		return;
 	}
 
+	// setup constants
 	image_geometry::PinholeCameraModel cam_model_;
 	cam_model_.fromCameraInfo(info_msg);
 	
@@ -151,13 +153,15 @@ void imageCb(const sensor_msgs::ImageConstPtr& depth_msg,
 
 	const int row_step = depth_msg->step / sizeof(uint16_t);
 
-	int vmax = depth_msg->height;
+	const int vmax = depth_msg->height;
 	const int vfpstart = (int) (depth_msg->height * image_ignore_ratio_);
+
 
 	float hrzangleoffst;
 	double fpobstacleheight;
 	double fpcliffdepth;
 
+	// use tighter FP tolerance for calibration 
 	if (calibrationcomplete) {
 		hrzangleoffst = horiz_angle_offset_; 
 		fpobstacleheight = floorplane_obstacle_height_;
@@ -166,23 +170,24 @@ void imageCb(const sensor_msgs::ImageConstPtr& depth_msg,
 	} else {
 		framecalibrated = false;
 		hrzangleoffst = -HRZCALRANGE-CALIBCONST;
-		fpobstacleheight = fpcliffdepth = 0.01;
+		fpobstacleheight = 0.01;
+		fpcliffdepth = 0.01;
 	}
 	
 	int frameFPcount = 0;
 	int maxframeFPcount = 0;
 	float winnerhrzangleoffst = 0;
 
-
+	// iterate through image pixels, multiple on initial frames for calibration, once only after
 	do {
 		const uint16_t* depth_row = reinterpret_cast<const uint16_t*>(&depth_msg->data[0]);
 		depth_row += vfpstart * row_step; // Offset to vfpstart
 		
 		for (int v = vfpstart; v < vmax; v++, depth_row += row_step) { 
 
-			if ( !(v % SKIPY) ) continue; // && !framecalibrated floor plane skip 50% vert pixels reduce cpu
+			if ( !(v % SKIPY) ) continue; // && !framecalibrated // floor plane skip % of vert pixels reduce cpu
 
-			for (int u = 0; u < (int) depth_msg->width; u+=SKIPX) { 
+			for (int u = 0; u < (int) depth_msg->width; u+=SKIPX) {  // SKIPX = save cpu, and closer to lidar density anyway
 
 				uint16_t depth = depth_row[u];
 
@@ -201,8 +206,7 @@ void imageCb(const sensor_msgs::ImageConstPtr& depth_msg,
 					float fpMin = (frame_z_ - fpobstacleheight) / sin(yAngle);
 					float fpMax = (frame_z_ + fpcliffdepth) / sin(yAngle);
 					if (z>fpMin && z<fpMax) {
-						if (z <= 1.0) 
-							frameFPcount ++;
+						if (z <= 1.0)  frameFPcount ++; // (for calibration use only)
 						continue;  // is within floor plane, so skip use_point
 					}
 					

@@ -1,21 +1,24 @@
 <launch>
 	
-	<!-- TODO: df model -->
-	<param name="robot_description" textfile="$(find oculusprime)/description/oculusprime.urdf" />
+	<!-- TODO: autocrawler model -->
+<!--
+	<param name="robot_description" textfile="$(find autocrawler)/description/autocrawler.urdf" />
+-->
 
-	<node pkg="df" type="odom_tf.py" name="odom_tf" required="true" output="screen" >
+	<node pkg="autocrawler" type="odom_tf.py" name="odom_tf" required="true" output="screen" >
 		<param name="odom_lag" value="0.035"/> 
 	</node>
-		
-	<node pkg="tf" type="static_transform_publisher" name="base_to_xaxxon_lidar_broadcaster" 
-	args="0.103 0.0 0.120 0 0 0 /base_link /laser_frame 100" /> 
+	
+	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
+	args="0.103 0.0 0.120 0 0 0 base_link laser_frame" /> 
 
 	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen">
 		<param name="masks" value="54 80  162 174  190 208  279 305"/>
 		<param name="dropscan_turnrate" value="45"/>
+		<param name="scan_topic" value="scan_lidar"/> 
 	</node>	
-
-  <arg name="scan_topic" default="scan" />
+	
+  <arg name="scan_topic" default="scan_lidar" />
   <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" required="true">
     <param name="odom_frame" value="odom"/>
     <param name="map_update_interval" value="2.0"/>  
@@ -33,17 +36,9 @@
     <param name="srt" value="0.02"/>
     <param name="str" value="0.01"/>
     <param name="stt" value="0.02"/>
-
-<!--
-    <param name="linearUpdate" value="0.5"/> 
-    <param name="angularUpdate" value="0.436"/>
-    <param name="temporalUpdate" value="-1.0"/>
--->
-   
     <param name="linearUpdate" value="0.2"/> 
     <param name="angularUpdate" value="0.2"/>
     <param name="temporalUpdate" value="0.5"/>
-    
     <param name="resampleThreshold" value="0.5"/>
     <param name="particles" value="30.0"/> 
 	<param name="throttle_scans" value="1" /> 
@@ -51,7 +46,6 @@
     <param name="ymin" value="-1.0"/>
     <param name="xmax" value="1.0"/>
     <param name="ymax" value="1.0"/>
-
     <param name="delta" value="0.05"/>
     <param name="llsamplerange" value="0.01"/>
     <param name="llsamplestep" value="0.01"/>

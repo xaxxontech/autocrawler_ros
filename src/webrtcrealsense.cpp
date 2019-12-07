@@ -23,6 +23,7 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 #include <thread>
+#include <std_msgs/String.h>
 
 enum AppState {
   APP_STATE_UNKNOWN = 0,
@@ -70,6 +71,7 @@ static const gchar *audio_device = nullptr;
 static const gchar *video_width = nullptr; 
 static const gchar *video_height = nullptr; 
 static const gchar *video_bitrate = nullptr; 
+static ros::Publisher webrtcstatus_pub;
 
 static GOptionEntry entries[] =
 {
@@ -482,6 +484,10 @@ on_server_closed (SoupWebsocketConnection * conn G_GNUC_UNUSED,
 	app_state = SERVER_CLOSED;
 	// cleanup_and_quit_loop ("Server connection closed", APP_STATE_UNKNOWN);
 	g_print ("Server connection closed, trying to continue anyway\n");
+
+	std_msgs::String msg;
+    msg.data = "disconnected";
+    webrtcstatus_pub.publish(msg);
 }
 
 /* One mega message handler for our asynchronous calling mechanism */
@@ -664,6 +670,10 @@ on_server_connected (SoupSession * session, GAsyncResult * res,
 
   /* Register with the server so it knows about us and can accept commands */
   register_with_server ();
+  
+  	std_msgs::String rosmsg; 
+    rosmsg.data = "connected";
+    webrtcstatus_pub.publish(rosmsg);
 }
 
 /*
@@ -844,10 +854,10 @@ int main(int argc, char **argv)
   if (!check_plugins ())
     return -1;
 
-  if (!peer_id) {
-    g_printerr ("--peer-id is a required argument\n");
-    return -1;
-  }
+  // if (!peer_id) {
+    // g_printerr ("--peer-id is a required argument\n");
+    // return -1;
+  // }
 
   /* Disable ssl when running a localhost server, because
    * it's probably a test server with a self-signed certificate */
@@ -860,6 +870,14 @@ int main(int argc, char **argv)
   }
 
 	double start = 0;
+	
+	webrtcstatus_pub = n.advertise<std_msgs::String>("webrtcstatus", 10);
+	
+	std_msgs::String msg; // = "waiting";
+    // std::stringstream ss;
+    // ss << "hello world ";
+    msg.data = "waiting";
+    webrtcstatus_pub.publish(msg);
 	
 	ros::Rate r(100); // 100 hz
 	while (ros::ok())

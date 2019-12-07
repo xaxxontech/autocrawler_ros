@@ -101,7 +101,7 @@ def lidarScanCallback(data):
 	
 	if camrangeslength == -1: # no cam data yet, wait
 		return
-	
+
 	if lidarrangeslength == -1: # set once
 		lidarrangeslength = len(data.ranges)
 		

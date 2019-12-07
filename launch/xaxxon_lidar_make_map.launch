@@ -2,11 +2,11 @@
 <launch>
 	
 <!--
-	<include file="$(find df)/launch/xaxxon_lidar_mapping.launch" />	
+	<include file="$(find autocrawler)/launch/gmapping.launch" />	
 -->
-	<include file="$(find df)/launch/cartographer.launch" />	
+	<include file="$(find autocrawler)/launch/cartographer.launch" />	
 	
-	<node pkg="df" type="map_remote.py" name="map_remote" required="true" />
+	<node pkg="autocrawler" type="map_remote.py" name="map_remote" required="true" />
 
 
 </launch>

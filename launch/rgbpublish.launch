@@ -19,7 +19,7 @@
             videoconvert ! 
             avenc_flv bitrate=1000000 ! 
             flvmux ! 
-            rtmpsink location='rtmp://127.0.0.1:1935/oculusPrime/stream1 live=1'
+            rtmpsink location='rtmp://127.0.0.1:1935/autocrawler/stream1 live=1'
     </rosparam>
 		<remap from="image_raw" to="/camera/color/image_raw"/>
 	</node>
