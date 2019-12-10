@@ -1,9 +1,6 @@
 
 <launch>
 	
-<!--
-	<include file="$(find autocrawler)/launch/gmapping.launch" />	
--->
 	<include file="$(find autocrawler)/launch/cartographer.launch" />	
 	
 	<node pkg="autocrawler" type="map_remote.py" name="map_remote" required="true" />
