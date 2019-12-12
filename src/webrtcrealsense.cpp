@@ -307,7 +307,7 @@ on_negotiation_needed (GstElement * element, gpointer user_data)
 }
 
 #define STUN_SERVER " stun-server=stun://stun.l.google.com:19302 "
-#define TURN_SERVER " turn-server=turn://oculus:robot@127.0.0.1:3478 "
+#define TURN_SERVER " turn-server=turn://auto:robot@127.0.0.1:3478 "
 #define RTP_CAPS_OPUS "application/x-rtp,media=audio,encoding-name=OPUS,payload="
 #define RTP_CAPS_VP8 "application/x-rtp,media=video,encoding-name=VP8,payload="
 
