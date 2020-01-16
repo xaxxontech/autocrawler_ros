@@ -5,9 +5,11 @@
 	<arg name="videoheight" default="480" />
 	<arg name="videobitrate" default="256" />
 	<arg name="peerid" default=""/>
+	<arg name="webrtcserver" default="wss://127.0.0.1:8443"/>
 	<node name="webrtcrs" pkg="autocrawler" type="webrtcrs" output="screen" 
 		  args="--peer-id=$(arg peerid) $(arg audiodevice) --video-width=$(arg videowidth) 
-			--video-height=$(arg videoheight) --video-bitrate=$(arg videobitrate)" 
+			--video-height=$(arg videoheight) --video-bitrate=$(arg videobitrate) 
+			--server=$(arg webrtcserver)" 
 		  respawn="true">
 		<remap from="image_raw" to="/camera/color/image_raw"/>
 	</node>

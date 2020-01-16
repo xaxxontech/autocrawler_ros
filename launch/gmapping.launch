@@ -9,14 +9,22 @@
 		<param name="odom_lag" value="0.035"/> 
 	</node>
 	
+	
+		
+	<!-- lidar rotated, hides forward blind spot in 1st mask -->
 	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
-	args="0.103 0.0 0.120 0 0 0 base_link laser_frame" /> 
-
-	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen">
+		args="0.103 0.0 0.120 1.396 0 0 base_link laser_frame" /> 
+		
+	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen"
+	clear_params="true">
 		<param name="masks" value="54 80  162 174  190 208  279 305"/>
-		<param name="dropscan_turnrate" value="45"/>
 		<param name="scan_topic" value="scan_lidar"/> 
-	</node>	
+		<param name="dropscan_turnrate" value="45"/>
+		<param name="rotate_forward_offset" value="80.0"/>
+	</node>
+	
+
+
 	
   <arg name="scan_topic" default="scan_lidar" />
   <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" required="true">

@@ -11,6 +11,7 @@ from sensor_msgs.msg import LaserScan
 import actionlib
 from actionlib_msgs.msg import *
 from std_srvs.srv import Empty
+import dynamic_reconfigure.client
 
 """
 sending info:
@@ -48,6 +49,7 @@ goal = None
 turnspeed = 100
 secondspertwopi = 4.2 # calibration, automate? (do in java, faster)
 # docked = False
+lidarclient = dynamic_reconfigure.client.Client("lidarbroadcast")
 
 def mapcallBack(data):
 	global lockfilepath
@@ -252,6 +254,19 @@ def goalcancel():
 	globalpath = []
 	recoveryrotate = False
 	
+def lidarSetParam(str):
+	global lidarclient
+	
+	if (str == "disabled"):
+		print("lidarSetParam " + str)
+		params = { 'lidar_enable' : 'false' }
+		lidarclient.update_configuration(params)
+	elif (str=="enabled"):
+		print("lidarSetParam " + str)
+		params = { 'lidar_enable' : 'true' }
+		lidarclient.update_configuration(params)
+
+	
 # main
 
 oculusprimesocket.connect()	
@@ -293,7 +308,8 @@ if not rospy.is_shutdown():
 lasttext = ""
 
 while not rospy.is_shutdown():
-	s = oculusprimesocket.replyBufferSearch("<state> (rosinitialpose|rossetgoal|rosgoalcancel) ")
+	
+	s = oculusprimesocket.replyBufferSearch("<state> (rosinitialpose|rossetgoal|rosgoalcancel|lidar) ")
 	if re.search("rosinitialpose", s):
 		oculusprimesocket.sendString("state delete rosinitialpose")
 		publishinitialpose(s.split()[2])
@@ -308,6 +324,10 @@ while not rospy.is_shutdown():
 	
 	elif re.search("rosgoalcancel true", s):
 		goalcancel()
+		
+	elif re.search("lidar", s):
+		lidarSetParam(s.split()[2])
+		
 		
 	t = rospy.get_time()
 	if t - lastsendinfo > sendinfodelay:

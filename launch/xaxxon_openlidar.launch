@@ -10,5 +10,6 @@
 	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen">
 		<param name="masks" value="54 80  162 174  190 208  279 305"/>
 	</node>	
-	 
+
+	
 </launch>

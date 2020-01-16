@@ -1,22 +1,11 @@
 <launch>
-		
-	<!-- lidar, rotated -->
-<!--
-	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
-		args="0.103 0.0 0.120 0 0 0 base_link laser_frame" /> 
-		
-	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen">
-		<param name="masks" value="19.4 45.4 127.4 139.4 155.4 173.4 244.4 270.4"/>
-		<param name="scan_topic" value="scan_lidar"/> 
-		<param name="forward_offset" value="223.6"/>
-	</node>
--->
 	
-	<!-- lidar, not rotated -->
+	<!-- lidar -->
 	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
 	args="0.103 0.0 0.120 0 0 0 base_link laser_frame" /> 
 
-	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen">
+	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen"
+		clear_params="true">
 		<param name="masks" value="54 80  162 174  190 208  279 305"/>
 		<param name="scan_topic" value="scan_lidar"/> 
 	</node>	
@@ -51,7 +40,7 @@
     </include>
 
 	<!-- depthcamtoscan-->
-	<node pkg="autocrawler" type="depthcamtoscan" name="depthcamtoscan" output="screen" required="true"/>
+	<node pkg="autocrawler" type="depthcamtoscan" name="depthcamtoscan" output="screen" required="false"/>
 
 	<!-- scan merge -->
 	<node pkg="autocrawler" type="lidarrealsensemerge.py" name="lidarrealsensemerge" required="true" output="screen">

@@ -120,7 +120,7 @@ sensor_msgs::LaserScanPtr get_scan_msg(const sensor_msgs::ImageConstPtr& depth_m
 	scan_msg->range_max = 3.0;
 	
 	// Calculate and fill the ranges
-	uint32_t ranges_size = depth_msg->width+1;
+	uint32_t ranges_size = depth_msg->width;
 	scan_msg->ranges.assign(ranges_size, std::numeric_limits<float>::quiet_NaN());
 
 	return scan_msg;
@@ -143,6 +143,7 @@ void imageCb(const sensor_msgs::ImageConstPtr& depth_msg,
 	cam_model_.fromCameraInfo(info_msg);
 	
 	sensor_msgs::LaserScanPtr scan_msg = get_scan_msg(depth_msg, cam_model_);
+	const int MAXINDEX = depth_msg->width -1;
 	
 	const float center_x = cam_model_.cx();
 	const float center_y = cam_model_.cy(); // pixels
@@ -194,6 +195,8 @@ void imageCb(const sensor_msgs::ImageConstPtr& depth_msg,
 				double r = depth; // Assign to pass through NaNs and Infs
 				double th = -atan2((double)(u - center_x) * constant_x, unit_scaling); // Atan2(x, z), but depth divides out
 				int index = (th - scan_msg->angle_min) / scan_msg->angle_increment;
+				if (index > MAXINDEX) index = MAXINDEX;
+				if (index < 0) index = 0;
 
 				if (depth != 0) {
 					// Calculate in XYZ
@@ -274,3 +277,4 @@ int main(int argc, char** argv)
 
 	ros::spin();
 }
+

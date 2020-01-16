@@ -1,11 +1,38 @@
 <launch>
 	
 	<node pkg="autocrawler" type="odom_tf.py" name="odom_tf" required="true" output="screen" >
-<!--
-		<param name="odom_lag" value="0.035"/> 
--->
 	</node>
 	
+	
+
+	<!-- lidar rotated, hides forward blind spot in 1st mask -->
+	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
+		args="0.103 0.0 0.120 0 0 0 base_link rotated_laser_frame" /> 
+
+	<node pkg="tf2_ros" type="static_transform_publisher" name="rotated_lidar_broadcaster" 
+		args="0 0.0 0.0 1.396 0 0 rotated_laser_frame laser_frame" /> 
+		
+<!--
+	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen"
+	clear_params="true">
+		<param name="masks" value="82 94  110 128  199 225  334 360"/>
+		<param name="scan_topic" value="scan"/> 
+		<param name="forward_offset" value="269.0"/>
+	</node>
+-->
+
+	<node pkg="xaxxon_openlidar" type="lidarbroadcast.py" name="lidarbroadcast" required="true" output="screen"
+	clear_params="true">
+		<param name="masks" value="54 80  162 174  190 208  279 305"/>
+		<param name="scan_topic" value="scan"/> 
+		<param name="rotate_forward_offset" value="80.0"/>
+	</node>
+	
+	
+	
+	
+	<!-- lidar, not rotated -->
+<!--
 	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
 	args="0.103 0.0 0.120 0 0 0 base_link laser_frame" /> 
 
@@ -14,6 +41,7 @@
 		<param name="dropscan_turnrate" value="0"/>
 		<param name="scan_topic" value="scan"/> 
 	</node>	
+-->
 
 	<node name="cartographer_node" pkg="cartographer_ros"
 		  type="cartographer_node" args="

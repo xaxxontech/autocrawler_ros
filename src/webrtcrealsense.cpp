@@ -55,7 +55,7 @@ static GObject *send_channel, *receive_channel;
 static SoupWebsocketConnection *ws_conn = nullptr;
 static AppState app_state = APP_STATE_UNKNOWN;
 static const gchar *peer_id = nullptr;
-static const gchar *server_url = "wss://xaxxon.com:8443";
+static const gchar *server_url = "wss://127.0.0.1:8443";
 static gboolean disable_ssl = FALSE;
 
 // added
@@ -698,7 +698,9 @@ connect_to_websocket_server_async (void)
 
   message = soup_message_new (SOUP_METHOD_GET, server_url);
 
-  g_print ("Connecting to server...\n");
+	gchar *msg = g_strconcat ("Connecting to server: ", server_url,"\n", NULL);
+	g_print (msg);
+	g_free(msg);
   
   serverConnection = g_cancellable_new ();
 

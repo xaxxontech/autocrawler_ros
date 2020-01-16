@@ -9,7 +9,7 @@
 		<arg name="color_fps"      value="$(arg color_fps)"/>
 	</include>
 	
-	<node pkg="autocrawler" type="remote_nav.py" name="remote_nav" required="true" />
+	<node pkg="autocrawler" type="remote_nav.py" name="remote_nav" required="true" output="screen"/>
 			
 
 </launch>

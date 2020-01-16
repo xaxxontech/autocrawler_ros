@@ -68,6 +68,9 @@ def getlidarscan(angle, scan):
 	
 def getcamscan(angle):
 	
+	if len(camscans) == 0:
+		return 0.0
+	
 	if angle <= camscans[0].angle_max:
 		indexangle = angle - camscans[0].angle_min
 		#  scannum = 1 # use early scan to match time, when rotated
@@ -99,8 +102,8 @@ def getcamscan(angle):
 def lidarScanCallback(data):
 	global lidarrangeslength
 	
-	if camrangeslength == -1: # no cam data yet, wait
-		return
+	#  if camrangeslength == -1: # no cam data yet, wait
+		#  return
 
 	if lidarrangeslength == -1: # set once
 		lidarrangeslength = len(data.ranges)
