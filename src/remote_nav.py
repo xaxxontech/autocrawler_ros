@@ -258,11 +258,11 @@ def lidarSetParam(str):
 	global lidarclient
 	
 	if (str == "disabled"):
-		print("lidarSetParam " + str)
+		#  print("lidarSetParam " + str)
 		params = { 'lidar_enable' : 'false' }
 		lidarclient.update_configuration(params)
 	elif (str=="enabled"):
-		print("lidarSetParam " + str)
+		#  print("lidarSetParam " + str)
 		params = { 'lidar_enable' : 'true' }
 		lidarclient.update_configuration(params)
 

@@ -26,7 +26,11 @@
              flvmux ! 
              rtmpsink location='rtmp://127.0.0.1:1935/autocrawler/stream1 live=1'
         </rosparam>
+<!--
 		<remap from="image_raw" to="/usb_cam/image_raw"/>
+-->
+		<remap from="image_raw" to="/fiducial_images"/>
+
 	</node>
 	
 	

@@ -41,7 +41,7 @@ data: [... ...]
 filenum = 0
 MAXFILES = 100
 PATH = "/dev/shm/rosimgframes"  # filename format: frame number (integer) only, with no extension
-
+imgnum = 0
 
 def cleanup():
 	rospy.sleep(3)
@@ -58,7 +58,11 @@ def deletefiles():
 	
 
 def imgCallBack(data):
-	global filenum
+	global filenum, imgnum
+	
+	#  imgnum += 1
+	#  if data.width > 640 and imgnum %2 == 0: # skip every other high res frame
+		#  return 
 	
 	oldfile = PATH+"/"+str(filenum-MAXFILES)
 

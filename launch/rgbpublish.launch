@@ -1,15 +1,19 @@
 <launch>
 	
+<!--
+	<arg name="color_width" default="640"/>
+	<arg name="color_height" default="480"/>
 	<include file="$(find realsense2_camera)/launch/rs_camera.launch" >
 		<arg name="enable_depth" value="false" />
 		<arg name="enable_fisheye" value="false" />
 		<arg name="enable_infra1" value="false"/>
 		<arg name="enable_infra2" value="false"/>
-		<arg name="color_width" value="640"/>
-		<arg name="color_height" value="480"/>
+		<arg name="color_width"       value="$(arg color_width)"/>
+		<arg name="color_height"      value="$(arg color_height)"/>
 		<arg name="enable_color" value="true"/>
-		<arg name="initial_reset" value="true"/>
+		<arg name="initial_reset" value="false"/>
 	</include>
+-->
 	
 	<node name="gst_video_server" pkg="gst_video_server" type="server_node" output="screen"
 			required="true">

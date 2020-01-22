@@ -137,6 +137,8 @@ void imageCb(const sensor_msgs::ImageConstPtr& depth_msg,
 		// std::cout << "skip init frame: " << framecount << "\n";
 		return;
 	}
+	
+	if (depth_msg->width <1) return;  // TODO: testing
 
 	// setup constants
 	image_geometry::PinholeCameraModel cam_model_;
