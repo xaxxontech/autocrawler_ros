@@ -12,16 +12,13 @@
 	<arg name="color_width" default="640"/>
 	<arg name="color_height" default="480"/>
 	<arg name="color_fps" default="15"/>
-	<include file="$(find autocrawler)/launch/lidarrealsense_merge.launch">
-		<arg name="color_width"       value="$(arg color_width)"/>
-		<arg name="color_height"      value="$(arg color_height)"/>
-		<arg name="color_fps"      value="$(arg color_fps)"/>
-	</include>
+	<include file="$(find autocrawler)/launch/lidarrealsense_merge.launch" />
 
 	<node pkg="autocrawler" type="arcmove_globalpath_follower.py" name="arcmove_globalpath_follower" output="screen"
 		required="true" /> 
 
-	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" required="true">
+	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" 
+			clear_params="true" required="true">
 		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_costmap_common_params.yaml" command="load" ns="global_costmap" />
 		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_costmap_common_params.yaml" command="load" ns="local_costmap" />
 		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_local_costmap_params.yaml" command="load" />
@@ -33,7 +30,7 @@
 	
 	<arg name="map" default="map.yaml" />
 	<node name="map_server" pkg="map_server" type="map_server" args="$(find autocrawler)/maps/$(arg map)"
-		required="true" />
+		required="true" clear_params="true" />
 
 	<include file="$(find autocrawler)/launch/amcl.launch" />
 

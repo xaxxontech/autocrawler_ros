@@ -3,7 +3,6 @@
 	<node pkg="autocrawler" type="odom_tf.py" name="odom_tf" required="true" output="screen" >
 	</node>
 	
-	
 
 	<!-- lidar rotated, hides forward blind spot in 1st mask -->
 	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_lidar_broadcaster" 
