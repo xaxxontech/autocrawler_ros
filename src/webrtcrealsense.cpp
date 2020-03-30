@@ -71,6 +71,8 @@ static const gchar *audio_device = nullptr;
 static const gchar *video_width = nullptr; 
 static const gchar *video_height = nullptr; 
 static const gchar *video_bitrate = nullptr; 
+static const gchar *turnserver_login = nullptr; 
+static const gchar *turnserver_port = nullptr; 
 static ros::Publisher webrtcstatus_pub;
 
 static GOptionEntry entries[] =
@@ -82,6 +84,8 @@ static GOptionEntry entries[] =
   { "video-width", 0, 0, G_OPTION_ARG_STRING, &video_width, "video width pixels", NULL },
   { "video-height", 0, 0, G_OPTION_ARG_STRING, &video_height, "video height pixels", NULL },
   { "video-bitrate", 0, 0, G_OPTION_ARG_STRING, &video_bitrate, "target bitrate kbps", NULL },
+  { "turnserver-port", 0, 0, G_OPTION_ARG_STRING, &turnserver_port, "TURN server port number", NULL },
+  { "turnserver-login", 0, 0, G_OPTION_ARG_STRING, &turnserver_login, "TURN server user:pass", NULL },
   { NULL },
 };
 
@@ -307,7 +311,6 @@ on_negotiation_needed (GstElement * element, gpointer user_data)
 }
 
 #define STUN_SERVER " stun-server=stun://stun.l.google.com:19302 "
-#define TURN_SERVER " turn-server=turn://auto:robot@127.0.0.1:3478 "
 #define RTP_CAPS_OPUS "application/x-rtp,media=audio,encoding-name=OPUS,payload="
 #define RTP_CAPS_VP8 "application/x-rtp,media=video,encoding-name=VP8,payload="
 
@@ -318,7 +321,8 @@ static gboolean start_pipeline (void)
   GError *error = NULL;
 
 	if(!audio_device) {
-		gchar *pl = g_strconcat ("webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER TURN_SERVER
+		gchar *pl = g_strconcat ("webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER
+			"turn-server=turn://", turnserver_login, "@127.0.0.1:", turnserver_port, " "
 			"videorate ! video/x-raw,width=", video_width, ",height=", video_height, ",framerate=15/1 ! "
 			"videoconvert ! queue ! vp8enc deadline=1 target-bitrate=", video_bitrate, "000 ! rtpvp8pay ! "
 			"queue ! " RTP_CAPS_VP8 "96 ! sendrecv. ", NULL);
@@ -327,7 +331,8 @@ static gboolean start_pipeline (void)
 		g_free(pl);
     }
     else {  
-		gchar *pl = g_strconcat ("webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER TURN_SERVER
+		gchar *pl = g_strconcat ("webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER 
+			"turn-server=turn://", turnserver_login, "@127.0.0.1:", turnserver_port, " "
 			"videorate ! video/x-raw,width=", video_width, ",height=", video_height, ",framerate=15/1 ! "
 			"videoconvert ! queue ! vp8enc deadline=1 target-bitrate=", video_bitrate, "000 ! rtpvp8pay ! "
 			"queue ! " RTP_CAPS_VP8 "96 ! sendrecv. "
