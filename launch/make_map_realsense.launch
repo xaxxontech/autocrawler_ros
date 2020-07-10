@@ -1,0 +1,8 @@
+<launch>
+	
+	<include file="$(find autocrawler)/launch/gmapping_realsense.launch" />	
+
+	<node pkg="autocrawler" type="map_remote.py" name="map_remote" required="true" />
+
+
+</launch>

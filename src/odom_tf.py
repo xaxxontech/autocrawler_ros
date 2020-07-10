@@ -70,9 +70,8 @@ def broadcast(s):
 	odom_pub.publish(odom)
 
 def cleanup():
-	# oculusprimesocket.sendString("state delete odometrybroadcast")
 	oculusprimesocket.sendString("odometrystop")
-	# oculusprimesocket.sendString("state delete navigationenabled")
+	#  oculusprimesocket.sendString("state odometrybroadcast 250")  # TODO:
 	oculusprimesocket.sendString("log odom_tf.py disconnecting")  # goodbye 
 
 
@@ -86,7 +85,7 @@ odom_pub = rospy.Publisher('odom', Odometry, queue_size=10)
 rospy.on_shutdown(cleanup)
 oculusprimesocket.connect()
 oculusprimesocket.sendString("log odom_tf.py connected")  
-oculusprimesocket.sendString("state odometrybroadcast 250")  # TODO: now is default in java -- required here?
+#  oculusprimesocket.sendString("state odometrybroadcast 150")  # TODO: now is default in java -- required here?
 oculusprimesocket.sendString("odometrystart")
 broadcast("* * 0 0".split()) # broadcast zero odometry baseline
 

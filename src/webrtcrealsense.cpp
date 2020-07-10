@@ -1,11 +1,8 @@
 /*
- * Demo gstreamer app for negotiating and streaming a sendrecv webrtc stream
- * with a browser JS app.
- *
- * gcc webrtc-sendrecv.c $(pkg-config --cflags --libs gstreamer-webrtc-1.0 gstreamer-sdp-1.0 libsoup-2.4 json-glib-1.0) -o webrtc-sendrecv
- *
- * Author: Nirbheek Chauhan <nirbheek@centricular.com>
+ * Includes code from https://github.com/centricular/gstwebrtc-demos/blob/master/sendrecv/gst/webrtc-sendrecv.c
+ * up-to-date to commit e4b86bc4f151e35222aff1bf7e46cec016e7b0ee 2020-6-25
  */
+ 
 #include <gst/gst.h>
 #include <gst/sdp/sdp.h>
 #include <gst/app/app.h>
@@ -108,7 +105,7 @@ cleanup_and_quit_loop (const gchar * msg, AppState state)
 
   if (loop) {
     g_main_loop_quit (loop);
-    g_main_loop_unref(loop);
+    //g_main_loop_unref(loop); // added - required?
     loop = NULL;
     g_print("g_main_loop quit\n");
   }
@@ -248,21 +245,30 @@ send_ice_candidate_message (GstElement * webrtc G_GNUC_UNUSED, guint mlineindex,
 }
 
 static void
-send_sdp_offer (GstWebRTCSessionDescription * offer)
+send_sdp_to_peer (GstWebRTCSessionDescription * desc)
 {
   gchar *text;
   JsonObject *msg, *sdp;
 
   if (app_state < PEER_CALL_NEGOTIATING) {
-    cleanup_and_quit_loop ("Can't send offer, not in call", APP_STATE_ERROR);
+    cleanup_and_quit_loop ("Can't send SDP to peer, not in call",
+        APP_STATE_ERROR);
     return;
   }
 
-  text = gst_sdp_message_as_text (offer->sdp);
-  g_print ("Sending offer:\n%s\n", text);
-
+  text = gst_sdp_message_as_text (desc->sdp);
   sdp = json_object_new ();
-  json_object_set_string_member (sdp, "type", "offer");
+
+  if (desc->type == GST_WEBRTC_SDP_TYPE_OFFER) {
+    g_print ("Sending offer:\n%s\n", text);
+    json_object_set_string_member (sdp, "type", "offer");
+  } else if (desc->type == GST_WEBRTC_SDP_TYPE_ANSWER) {
+    g_print ("Sending answer:\n%s\n", text);
+    json_object_set_string_member (sdp, "type", "answer");
+  } else {
+    g_assert_not_reached ();
+  }
+
   json_object_set_string_member (sdp, "sdp", text);
   g_free (text);
 
@@ -296,7 +302,7 @@ on_offer_created (GstPromise * promise, gpointer user_data)
   gst_promise_unref (promise);
 
   /* Send offer to peer */
-  send_sdp_offer (offer);
+  send_sdp_to_peer (offer);
   gst_webrtc_session_description_free (offer);
 }
 
@@ -306,14 +312,36 @@ on_negotiation_needed (GstElement * element, gpointer user_data)
   GstPromise *promise;
 
   app_state = PEER_CALL_NEGOTIATING;
-  promise = gst_promise_new_with_change_func (on_offer_created, user_data, NULL);;
+  promise = gst_promise_new_with_change_func (on_offer_created, user_data, NULL);
   g_signal_emit_by_name (webrtc1, "create-offer", NULL, promise);
 }
+
+static void
+on_ice_gathering_state_notify (GstElement * webrtcbin, GParamSpec * pspec,
+    gpointer user_data)
+{
+  GstWebRTCICEGatheringState ice_gather_state;
+  const gchar *new_state = "unknown";
+
+  g_object_get (webrtcbin, "ice-gathering-state", &ice_gather_state, NULL);
+  switch (ice_gather_state) {
+    case GST_WEBRTC_ICE_GATHERING_STATE_NEW:
+      new_state = "new";
+      break;
+    case GST_WEBRTC_ICE_GATHERING_STATE_GATHERING:
+      new_state = "gathering";
+      break;
+    case GST_WEBRTC_ICE_GATHERING_STATE_COMPLETE:
+      new_state = "complete";
+      break;
+  }
+  g_print ("ICE gathering state changed to %s\n", new_state);
+}
+
 
 #define STUN_SERVER " stun-server=stun://stun.l.google.com:19302 "
 #define RTP_CAPS_OPUS "application/x-rtp,media=audio,encoding-name=OPUS,payload="
 #define RTP_CAPS_VP8 "application/x-rtp,media=video,encoding-name=VP8,payload="
-
 
 static gboolean start_pipeline (void)
 {
@@ -409,6 +437,8 @@ static gboolean start_pipeline (void)
 	* added by us too, see on_server_message() */
 	g_signal_connect (webrtc1, "on-ice-candidate",
 	  G_CALLBACK (send_ice_candidate_message), NULL);
+	g_signal_connect (webrtc1, "notify::ice-gathering-state",
+	  G_CALLBACK (on_ice_gathering_state_notify), NULL);
 
 	gst_element_set_state (pipe1, GST_STATE_READY);
 
@@ -417,16 +447,11 @@ static gboolean start_pipeline (void)
 	  pipe1);
 	/* Lifetime is the same as the pipeline itself */
 	gst_object_unref (webrtc1);
-	
-	
-	
 
 	g_print ("Starting pipeline\n");
-	gst_element_set_state (pipe1, GST_STATE_PLAYING);
-	if (gst_element_get_state(pipe1, NULL, NULL, -1) == GST_STATE_CHANGE_FAILURE)
-		goto err;
-	else
-		g_print ("pipeline playing\n");
+	ret = gst_element_set_state (GST_ELEMENT (pipe1), GST_STATE_PLAYING);
+	if (ret == GST_STATE_CHANGE_FAILURE)
+	goto err;
 		
 	return TRUE;
 
@@ -559,6 +584,7 @@ on_server_message (SoupWebsocketConnection * conn, SoupWebsocketDataType type,
       case PEER_CONNECTED:
       case PEER_CALL_NEGOTIATING:
         app_state = PEER_CALL_ERROR;
+        break;
       default:
         app_state = APP_STATE_ERROR;
     }
@@ -600,35 +626,35 @@ on_server_message (SoupWebsocketConnection * conn, SoupWebsocketDataType type,
       }
 
       sdptype = json_object_get_string_member (child, "type");
-      /* In this example, we always create the offer and receive one answer.
-       * See tests/examples/webrtcbidirectional.c in gst-plugins-bad for how to
-       * handle offers from peers and reply with answers using webrtcbin. */
-      g_assert_cmpstr (sdptype, ==, "answer");
-
+      /* In this example, we create the offer and receive one answer by default,
+       * but it's possible to comment out the offer creation and wait for an offer
+       * instead, so we handle either here.
+       *
+       * See tests/examples/webrtcbidirectional.c in gst-plugins-bad for another
+       * example how to handle offers from peers and reply with answers using webrtcbin. */
       text = json_object_get_string_member (child, "sdp");
-
-      g_print ("Received answer:\n%s\n", text);
-
       ret = gst_sdp_message_new (&sdp);
       g_assert_cmphex (ret, ==, GST_SDP_OK);
-
       ret = gst_sdp_message_parse_buffer ((guint8 *) text, strlen (text), sdp);
       g_assert_cmphex (ret, ==, GST_SDP_OK);
 
-      answer = gst_webrtc_session_description_new (GST_WEBRTC_SDP_TYPE_ANSWER,
-          sdp);
-      g_assert_nonnull (answer);
+      if (g_str_equal (sdptype, "answer")) {
+        g_print ("Received answer:\n%s\n", text);
+        answer = gst_webrtc_session_description_new (GST_WEBRTC_SDP_TYPE_ANSWER,
+            sdp);
+        g_assert_nonnull (answer);
 
-      /* Set remote description on our pipeline */
-      {
-        GstPromise *promise = gst_promise_new ();
-        g_signal_emit_by_name (webrtc1, "set-remote-description", answer,
-            promise);
-        gst_promise_interrupt (promise);
-        gst_promise_unref (promise);
-      }
-
-      app_state = PEER_CALL_STARTED;
+        /* Set remote description on our pipeline */
+        {
+          GstPromise *promise = gst_promise_new ();
+          g_signal_emit_by_name (webrtc1, "set-remote-description", answer,
+              promise);
+          gst_promise_interrupt (promise);
+          gst_promise_unref (promise);
+        }
+        app_state = PEER_CALL_STARTED;
+      } 
+      
     } else if (json_object_has_member (object, "ice")) {
       const gchar *candidate;
       gint sdpmlineindex;
