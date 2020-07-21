@@ -14,7 +14,7 @@ def callback(msg):
 """main"""
 oculusprimesocket.connect()	
 rospy.init_node('webrtc_status_listener', anonymous=True)
-oculusprimesocket.sendString("webrtc_status_listener.py connected")  
+oculusprimesocket.sendString("log webrtc_status_listener.py connected")  
 rospy.Subscriber("webrtcstatus", String, callback)
 
 rospy.spin()

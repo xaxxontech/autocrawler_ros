@@ -1,22 +1,21 @@
 <launch>
 
 	<arg name="audiodevice" default="" />
-	<arg name="videowidth" default="640" />
-	<arg name="videoheight" default="480" />
-	<arg name="videobitrate" default="256" />
-	<arg name="peerid" default=""/>
-	<arg name="webrtcserver" default="wss://127.0.0.1:8443"/>
-	<arg name="turnserverlogin" default="user:pass"/>
-	<arg name="turnserverport" default="3478"/>
-	<node name="webrtcrs" pkg="autocrawler" type="webrtcrs" output="screen" 
-		  args="--peer-id=$(arg peerid) $(arg audiodevice) --video-width=$(arg videowidth) 
-			--video-height=$(arg videoheight) --video-bitrate=$(arg videobitrate) 
-			--server=$(arg webrtcserver)
-			--turnserver-login=$(arg turnserverlogin) --turnserver-port=$(arg turnserverport)" 
-		  respawn="true">
-		<remap from="image_raw" to="/camera/color/image_raw"/>
-	</node>
-	
-	<node pkg="autocrawler" type="webrtc_status_listener.py" name="webrtc_status_listener" required="true" output="screen" />
+    <arg name="videowidth" default="" />
+    <arg name="videoheight" default="" />
+    <arg name="videobitrate" default="" />
+    <arg name="peerid" default=""/>
+    <arg name="webrtcserver" default=""/>
+    <arg name="turnserverlogin" default=""/>
+    <arg name="turnserverport" default=""/>
+    <node name="webrtcrs" pkg="autocrawler" type="webrtcrs" output="screen" 
+	      args="$(arg peerid) $(arg audiodevice) $(arg videowidth) 
+		    $(arg videoheight) $(arg videobitrate) $(arg webrtcserver)
+		    $(arg turnserverlogin) $(arg turnserverport)" 
+	      respawn="true">
+	<remap from="image_raw" to="/camera/color/image_raw"/>
+    </node>
+    
+    <node pkg="autocrawler" type="webrtc_status_listener.py" name="webrtc_status_listener" required="true" output="screen" />
 
 </launch>
