@@ -1,0 +1,39 @@
+<launch>
+	
+<!--
+	<param name="robot_description" textfile="$(find oculusprime)/description/oculusprime.urdf" />
+-->
+
+	<node pkg="autocrawler" type="odom_tf.py" name="odom_tf" required="true" output="screen" >
+		<param name="odom_lag" value="0.035"/> 
+	</node>
+
+	<!-- lidar and realsense -->
+<!--
+	<arg name="color_width" default="640"/>
+	<arg name="color_height" default="480"/>
+	<arg name="color_fps" default="15"/>
+-->
+	<include file="$(find autocrawler)/launch/lidarrealsense_merge.launch" />
+
+	<node pkg="autocrawler" type="arcmove_globalpath_follower.py" name="arcmove_globalpath_follower" output="screen"
+		required="true" /> 
+
+	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" 
+			clear_params="true" required="true">
+		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_costmap_common_params.yaml" command="load" ns="global_costmap" />
+		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_costmap_common_params.yaml" command="load" ns="local_costmap" />
+		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_local_costmap_params.yaml" command="load" />
+		<rosparam file="$(find autocrawler)/params/global_costmap_params.yaml" command="load" />
+		<rosparam file="$(find autocrawler)/params/global_planner_params.yaml" command="load" />
+		<rosparam file="$(find autocrawler)/params/dwa_local_planner_params.yaml" command="load" />
+		<rosparam file="$(find autocrawler)/params/xaxxon_lidar_move_base_params.yaml" command="load" />
+	</node>
+	
+	<arg name="map" default="map.yaml" />
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find autocrawler)/maps/$(arg map)"
+		required="true" clear_params="true" />
+
+	<include file="$(find autocrawler)/launch/amcl.launch" />
+
+</launch>
