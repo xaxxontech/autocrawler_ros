@@ -49,7 +49,7 @@ goal = None
 turnspeed = 100
 secondspertwopi = 4.2 # calibration, automate? (do in java, faster)
 # docked = False
-lidarclient = dynamic_reconfigure.client.Client("lidarbroadcast")
+# lidarclient = dynamic_reconfigure.client.Client("lidarbroadcast")
 
 def mapcallBack(data):
 	global lockfilepath
@@ -325,8 +325,8 @@ while not rospy.is_shutdown():
 	elif re.search("rosgoalcancel true", s):
 		goalcancel()
 		
-	elif re.search("lidar", s):
-		lidarSetParam(s.split()[2])
+	# elif re.search("lidar", s):
+		# lidarSetParam(s.split()[2])
 		
 		
 	t = rospy.get_time()

@@ -4,7 +4,7 @@
 	<node pkg="tf2_ros" type="static_transform_publisher" name="base_to_realsense_broadcaster" 
 		args="0.152 0.012 0.163 0 0 0 base_link camera_link" />
     
-	<arg name="camera"                default="camera"/>
+	<arg name="camera"                default="realsensecamera"/>
 	<arg name="color_width" default="640"/>
 	<arg name="color_height" default="480"/>
 	<arg name="color_fps" default="15"/>
