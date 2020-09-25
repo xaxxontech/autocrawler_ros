@@ -1,0 +1,9 @@
+<launch>
+
+	<include file="$(find open_manipulator_controller)/launch/open_manipulator_controller.launch">
+		<arg name="dynamixel_usb_port"       value="/dev/ttyUSB3"/>
+	</include>
+	
+	<node pkg="autocrawler" type="autocrawler_openmanipulator.py" name="autocrawler_openmanipulator" required="true" output="screen"/>
+
+</launch>
