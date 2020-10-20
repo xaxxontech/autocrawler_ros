@@ -15,7 +15,7 @@ float64 path_time
 
 
 import rospy, tf
-import re
+import re, os
 import oculusprimesocket
 from sensor_msgs.msg import JointState
 from open_manipulator_msgs.srv import SetActuatorState, SetJointPosition
@@ -24,6 +24,7 @@ from open_manipulator_msgs.msg import JointPosition
 currentJointPositions = None
 recordedJointPositions = [None,None,None]
 startupok = False
+rest = True
 
 def jointCallback(data):
 	global currentJointPositions, startupok
@@ -42,6 +43,7 @@ def jointCallback(data):
 	
 	if not startupok:
 		startupok = True
+		oculusprimesocket.sendString("state arm ready")  
 		oculusprimesocket.sendString("messageclients openmanipulator ready")  
 	
 
@@ -62,6 +64,7 @@ def getJointPosition():
 	return JointPosition(joint_names, positions, currentJointPositions.max_accelerations_scaling_factor, currentJointPositions.max_velocity_scaling_factor)
 
 def moveToFloor():
+	global rest
 	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
 	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
 	newjointpositions = getJointPosition()
@@ -70,8 +73,10 @@ def moveToFloor():
 	newjointpositions.position[2] = -0.655009806156
 	newjointpositions.position[3] = 0.786932170391
 	set_joint_position('', newjointpositions , 2)	
+	rest=False
 	
 def moveToHome():
+	global rest
 	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
 	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
 	newjointpositions = getJointPosition()
@@ -80,6 +85,7 @@ def moveToHome():
 	newjointpositions.position[2] = 0.369689375162
 	newjointpositions.position[3] = 0.701029241085
 	set_joint_position('', newjointpositions , 2)
+	rest=False
 	
 def gripperopen():
 	rospy.wait_for_service('open_manipulator/goal_tool_control')
@@ -96,6 +102,7 @@ def gripperclose():
 	set_joint_position('', newjointpositions , 2)	
 
 def armrest():
+	global rest
 	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
 	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
 	newjointpositions = getJointPosition()
@@ -104,10 +111,24 @@ def armrest():
 	newjointpositions.position[2] = 1.45728182793
 	newjointpositions.position[3] = 0.506213665009
 	set_joint_position('', newjointpositions , 2)
+	rest = True
 
-
+def armForward():
+	global rest
+	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
+	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+	newjointpositions = getJointPosition()
+	newjointpositions.position[0] = -0.00153398083057
+	newjointpositions.position[1] = 0.00766990426928
+	newjointpositions.position[2] = 0.0291456356645
+	newjointpositions.position[3] = 0.00613592332229
+	set_joint_position('', newjointpositions , 2)
+	rest = False
+	
 	
 def main(args=None):
+	global rest
+	
 	rospy.init_node('autocrawler_openmanipulator', anonymous=False)
 	rospy.Subscriber("open_manipulator/joint_states", JointState, jointCallback) 
 	
@@ -124,7 +145,17 @@ def main(args=None):
 			# TODO: send open_manipulator_controller roslaunch command 
 			
 		elif re.search("arm off", s):
+			if not rest:
+				moveToHome()
+				rospy.sleep(1.5)
+				armrest()
+				rospy.sleep(2)
+			os.system('rosnode kill /open_manipulator')
+			rospy.sleep(1)
 			oculusprimesocket.sendString("malgcommand Q")
+			oculusprimesocket.sendString("messageclients openmanipulator off")  
+			oculusprimesocket.sendString("state delete arm")  
+			rospy.signal_shutdown("exit")
 			# TODO: kill open_manipulator_controller roslaunch 
 		
 		elif re.search("arm enable", s): # enable
@@ -135,6 +166,11 @@ def main(args=None):
 		elif re.search("arm disable", s): # disable
 			rospy.wait_for_service('open_manipulator/set_actuator_state')
 			set_actuator_state = rospy.ServiceProxy('open_manipulator/set_actuator_state', SetActuatorState)
+			if not rest:
+				moveToHome()
+				rospy.sleep(1.5)
+				armrest()
+				rospy.sleep(2)
 			set_actuator_state(False)
 		
 		elif re.search("arm open", s): # open TODO: BROKE
@@ -157,6 +193,10 @@ def main(args=None):
 			print("floor")
 			moveToFloor()
 		
+		elif re.search("arm forward", s): # forward
+			print("forward")
+			armForward()
+		
 		elif re.search("arm record", s): # record1
 			print("record"+s[-1])
 			num = int(s[-1])-1
@@ -166,25 +206,41 @@ def main(args=None):
 		elif re.search("arm goto", s): # rest
 			print("goto"+s[-1])
 			num = int(s[-1])-1
-			rospy.wait_for_service('open_manipulator/goal_joint_space_path')
-			set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
-			newjointpositions = getJointPosition()
-			newjointpositions.position[0] = recordedJointPositions[num].position[0]
-			newjointpositions.position[1] = recordedJointPositions[num].position[1]
-			newjointpositions.position[2] = recordedJointPositions[num].position[2]
-			newjointpositions.position[3] = recordedJointPositions[num].position[3]
-			set_joint_position('', newjointpositions , 2)
+			if not recordedJointPositions[num] == None:
+				rospy.wait_for_service('open_manipulator/goal_joint_space_path')
+				set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+				newjointpositions = getJointPosition()
+				newjointpositions.position[0] = recordedJointPositions[num].position[0]
+				newjointpositions.position[1] = recordedJointPositions[num].position[1]
+				newjointpositions.position[2] = recordedJointPositions[num].position[2]
+				newjointpositions.position[3] = recordedJointPositions[num].position[3]
+				set_joint_position('', newjointpositions , 2)
+				rest = False
 			
 		elif re.search("arm pickup", s):
 			gripperopen()
-			rospy.sleep(2)
 			moveToHome()
 			rospy.sleep(1.5)
 			moveToFloor()
-			rospy.sleep(3)
+			rospy.sleep(2)
 			gripperclose()
 			rospy.sleep(2)
 			moveToHome()
+			
+		elif re.search("arm grab", s):
+			gripperopen()
+			moveToHome()
+			rospy.sleep(1)
+			armForward()
+			rospy.sleep(2)
+			gripperclose()
+			rospy.sleep(2.5)
+			moveToHome()
+			rospy.sleep(1)
+			gripperopen()
+			rospy.sleep(3)
+			armrest()
+			gripperclose()
 		
 		rospy.sleep(0.01) 
 
