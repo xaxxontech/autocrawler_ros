@@ -145,6 +145,7 @@ def main(args=None):
 			# TODO: send open_manipulator_controller roslaunch command 
 			
 		elif re.search("arm off", s):
+			print("off")
 			if not rest:
 				moveToHome()
 				rospy.sleep(1.5)
@@ -159,11 +160,13 @@ def main(args=None):
 			# TODO: kill open_manipulator_controller roslaunch 
 		
 		elif re.search("arm enable", s): # enable
+			print("enable")
 			rospy.wait_for_service('open_manipulator/set_actuator_state')
 			set_actuator_state = rospy.ServiceProxy('open_manipulator/set_actuator_state', SetActuatorState)
 			set_actuator_state(True)
 			
 		elif re.search("arm disable", s): # disable
+			print("disable")
 			rospy.wait_for_service('open_manipulator/set_actuator_state')
 			set_actuator_state = rospy.ServiceProxy('open_manipulator/set_actuator_state', SetActuatorState)
 			if not rest:
@@ -218,6 +221,7 @@ def main(args=None):
 				rest = False
 			
 		elif re.search("arm pickup", s):
+			print("pickup")
 			gripperopen()
 			moveToHome()
 			rospy.sleep(1.5)
@@ -228,6 +232,7 @@ def main(args=None):
 			moveToHome()
 			
 		elif re.search("arm grab", s):
+			print("grab")
 			gripperopen()
 			moveToHome()
 			rospy.sleep(1)
