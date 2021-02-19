@@ -23,8 +23,12 @@ from open_manipulator_msgs.msg import JointPosition
 
 currentJointPositions = None
 recordedJointPositions = [None,None,None]
+positionsfromfile = []
 startupok = False
 rest = True
+
+sep = os.path.sep
+settingsfile = os.environ.get("CATALINA_HOME")+sep+"conf"+sep+"openmanipulator.txt"
 
 def jointCallback(data):
 	global currentJointPositions, startupok
@@ -67,11 +71,16 @@ def moveToFloor():
 	global rest
 	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
 	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+	
+	pos = getfileposition("floor")
+	if not pos: 
+		pos = [-0.0322135984898, 1.44500994682, -0.655009806156, 0.786932170391]
+
 	newjointpositions = getJointPosition()
-	newjointpositions.position[0] = -0.0322135984898
-	newjointpositions.position[1] = 1.44500994682
-	newjointpositions.position[2] = -0.655009806156
-	newjointpositions.position[3] = 0.786932170391
+	newjointpositions.position[0] = pos[0]
+	newjointpositions.position[1] = pos[1]
+	newjointpositions.position[2] = pos[2]
+	newjointpositions.position[3] = pos[3]
 	set_joint_position('', newjointpositions , 2)	
 	rest=False
 	
@@ -79,11 +88,17 @@ def moveToHome():
 	global rest
 	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
 	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+	
+	pos = getfileposition("home")
+	if not pos: 
+		pos = [-0.00153398083057, -1.05231082439, 0.369689375162, 0.701029241085]
+
 	newjointpositions = getJointPosition()
-	newjointpositions.position[0] = -0.00153398083057
-	newjointpositions.position[1] = -1.05231082439
-	newjointpositions.position[2] = 0.369689375162
-	newjointpositions.position[3] = 0.701029241085
+	newjointpositions.position[0] = pos[0]
+	newjointpositions.position[1] = pos[1]
+	newjointpositions.position[2] = pos[2]
+	newjointpositions.position[3] = pos[3]
+	
 	set_joint_position('', newjointpositions , 2)
 	rest=False
 	
@@ -105,11 +120,17 @@ def armrest():
 	global rest
 	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
 	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+	
+	pos = getfileposition("rest")
+	if not pos: 
+		pos = [-0.00306796166115, -1.56466042995, 1.45728182793, 0.506213665009]
+
 	newjointpositions = getJointPosition()
-	newjointpositions.position[0] = -0.00306796166115
-	newjointpositions.position[1] = -1.56466042995
-	newjointpositions.position[2] = 1.45728182793
-	newjointpositions.position[3] = 0.506213665009
+	newjointpositions.position[0] = pos[0]
+	newjointpositions.position[1] = pos[1]
+	newjointpositions.position[2] = pos[2]
+	newjointpositions.position[3] = pos[3]
+	
 	set_joint_position('', newjointpositions , 2)
 	rest = True
 
@@ -117,13 +138,125 @@ def armForward():
 	global rest
 	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
 	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+	
+	pos = getfileposition("forward")
+	if not pos: 
+		pos = [-0.00153398083057, 0.00766990426928, 0.0291456356645, 0.00613592332229]
+
 	newjointpositions = getJointPosition()
-	newjointpositions.position[0] = -0.00153398083057
-	newjointpositions.position[1] = 0.00766990426928
-	newjointpositions.position[2] = 0.0291456356645
-	newjointpositions.position[3] = 0.00613592332229
+	newjointpositions.position[0] = pos[0]
+	newjointpositions.position[1] = pos[1]
+	newjointpositions.position[2] = pos[2]
+	newjointpositions.position[3] = pos[3]
+
 	set_joint_position('', newjointpositions , 2)
 	rest = False
+
+
+def loadpositionsfromfile():
+	global positionsfromfile
+	
+	f = open(settingsfile)
+	Lines = f.readlines()
+	f.close()
+
+	for line in Lines:
+
+		values = line.split() 
+		if not values: 		  # blank line	
+			continue
+
+		if line.strip()[0] == "#": # skip comments
+			continue
+
+		positionsfromfile.append(values)
+				
+	print(positionsfromfile)
+
+
+def savepositionstofile():
+	
+	if not positionsfromfile:
+		return
+		
+	positions = positionsfromfile[:]
+
+	f = open(settingsfile)
+	Lines = f.readlines()
+	f.close()
+	
+	f = open(settingsfile, "w")
+	
+	for line in Lines:
+
+		values = line.split() 
+		if not values: 		  # blank line	
+			f.write(line)
+			continue
+
+		if line.strip()[0] == "#": # comment
+			f.write(line)
+			continue
+
+		i = 0
+		for pos in positions:
+			
+			if values[0] == pos[0]:
+				line = ""
+				for s in pos:
+					line += s + " "
+				line = line.strip()+"\n"
+				f.write(line)
+				del positions[i]
+				break
+				
+			i += 1	
+	
+	# write any new positions leftover to the end
+	for pos in positions:
+		line = ""
+		for s in pos:
+			line += s + " "
+		line = line.strip()+"\n"
+		f.write(line)
+		
+	f.close()
+	print(settingsfile+" saved")
+	
+	
+def getfileposition(name):
+
+	if not positionsfromfile:
+		return None
+
+	for filepos in positionsfromfile:
+		if filepos[0] == name:
+			return [float(filepos[1]), float(filepos[2]), float(filepos[3]), float(filepos[4])]
+			
+	return None
+	
+def recordjointposition(num):
+	global positionsfromfile
+	#  recordedJointPositions[num] = getJointPosition()
+	#  printJointPos(recordedJointPositions[num])
+	
+	name = "user"+str(num)
+	p = getJointPosition()
+	values = [name, str(p.position[0]), str(p.position[1]), str(p.position[2]), str(p.position[3])]
+	
+	# check if already in list
+	i = 0
+	for filepos in positionsfromfile:
+		if filepos[0] == name:
+			positionsfromfile[i] = values
+			values = None
+		i += 1
+		
+	if values:
+		positionsfromfile.append(values)
+	
+	savepositionstofile()
+			
 	
 	
 def main(args=None):
@@ -134,8 +267,9 @@ def main(args=None):
 	
 	oculusprimesocket.connect()	
 	oculusprimesocket.sendString("log autocrawler_openmanipulator.py connected")  
+	oculusprimesocket.sendString("state delete arm")  
 
-	# jointpos = JointPosition(["joint1","joint2","joint3","joint4","gripper"],[0,0,0,0],1,1)
+	loadpositionsfromfile()
 
 	while not rospy.is_shutdown():
 		s = oculusprimesocket.replyBufferSearch("<state> arm")
@@ -144,7 +278,7 @@ def main(args=None):
 			oculusprimesocket.sendString("malgcommand W")
 			# TODO: send open_manipulator_controller roslaunch command 
 			
-		elif re.search("arm off", s):
+		elif re.search("arm off", s): # arm power off macro
 			print("off")
 			if not rest:
 				moveToHome()
@@ -157,30 +291,32 @@ def main(args=None):
 			oculusprimesocket.sendString("messageclients openmanipulator off")  
 			oculusprimesocket.sendString("state delete arm")  
 			rospy.signal_shutdown("exit")
-			# TODO: kill open_manipulator_controller roslaunch 
+			# TODO: kill open_manipulator_controller roslaunch, currently handled by javascript
 		
-		elif re.search("arm enable", s): # enable
+		elif re.search("arm enable", s): # enable servos
 			print("enable")
 			rospy.wait_for_service('open_manipulator/set_actuator_state')
 			set_actuator_state = rospy.ServiceProxy('open_manipulator/set_actuator_state', SetActuatorState)
 			set_actuator_state(True)
+			oculusprimesocket.sendString("messageclients servos enabled")  
 			
-		elif re.search("arm disable", s): # disable
+		elif re.search("arm disable", s): # disable servos macro 
 			print("disable")
 			rospy.wait_for_service('open_manipulator/set_actuator_state')
 			set_actuator_state = rospy.ServiceProxy('open_manipulator/set_actuator_state', SetActuatorState)
-			if not rest:
-				moveToHome()
-				rospy.sleep(1.5)
-				armrest()
-				rospy.sleep(2)
+			#  if not rest:
+				#  moveToHome()
+				#  rospy.sleep(1.5)
+				#  armrest()
+				#  rospy.sleep(2)
 			set_actuator_state(False)
+			oculusprimesocket.sendString("messageclients servos disabled")  
 		
-		elif re.search("arm open", s): # open TODO: BROKE
+		elif re.search("arm open", s): # gripper open 
 			print("open")
 			gripperopen()
 			
-		elif re.search("arm close", s): # open TODO: BROKE
+		elif re.search("arm close", s): # gripper close
 			print("close")
 			gripperclose()
 			
@@ -192,7 +328,7 @@ def main(args=None):
 			print("rest")
 			armrest()
 		
-		elif re.search("arm floor", s): # rest
+		elif re.search("arm floor", s): # floor
 			print("floor")
 			moveToFloor()
 		
@@ -200,27 +336,40 @@ def main(args=None):
 			print("forward")
 			armForward()
 		
-		elif re.search("arm record", s): # record1
-			print("record"+s[-1])
+		elif re.search("arm record", s): # record pos # 
+			print("record "+s[-1])
 			num = int(s[-1])-1
-			recordedJointPositions[num] = getJointPosition()
-			printJointPos(recordedJointPositions[num])
+			recordjointposition(num)
+			oculusprimesocket.sendString("messageclients joint #"+str(num+1)+" saved")  
 			
-		elif re.search("arm goto", s): # rest
+		elif re.search("arm goto", s): # user pos #
 			print("goto"+s[-1])
 			num = int(s[-1])-1
-			if not recordedJointPositions[num] == None:
+			
+			pos = getfileposition("user"+str(num))
+			if not pos == None:
 				rospy.wait_for_service('open_manipulator/goal_joint_space_path')
 				set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
 				newjointpositions = getJointPosition()
-				newjointpositions.position[0] = recordedJointPositions[num].position[0]
-				newjointpositions.position[1] = recordedJointPositions[num].position[1]
-				newjointpositions.position[2] = recordedJointPositions[num].position[2]
-				newjointpositions.position[3] = recordedJointPositions[num].position[3]
+				newjointpositions.position[0] = pos[0]
+				newjointpositions.position[1] = pos[1]
+				newjointpositions.position[2] = pos[2]
+				newjointpositions.position[3] = pos[3]
 				set_joint_position('', newjointpositions , 2)
 				rest = False
+				
+			#  if not recordedJointPositions[num] == None:
+				#  rospy.wait_for_service('open_manipulator/goal_joint_space_path')
+				#  set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+				#  newjointpositions = getJointPosition()
+				#  newjointpositions.position[0] = recordedJointPositions[num].position[0]
+				#  newjointpositions.position[1] = recordedJointPositions[num].position[1]
+				#  newjointpositions.position[2] = recordedJointPositions[num].position[2]
+				#  newjointpositions.position[3] = recordedJointPositions[num].position[3]
+				#  set_joint_position('', newjointpositions , 2)
+				#  rest = False
 			
-		elif re.search("arm pickup", s):
+		elif re.search("arm pickup", s): # macro
 			print("pickup")
 			gripperopen()
 			moveToHome()
@@ -231,7 +380,7 @@ def main(args=None):
 			rospy.sleep(2)
 			moveToHome()
 			
-		elif re.search("arm grab", s):
+		elif re.search("arm grab", s): # macro
 			print("grab")
 			gripperopen()
 			moveToHome()
