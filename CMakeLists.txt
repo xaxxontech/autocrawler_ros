@@ -89,23 +89,12 @@ target_link_libraries(webrtcrs
 )
 
 
-#add_executable(hello
-  #src/test.cpp
-#)
-
-#target_link_libraries(hello
-	#${catkin_LIBRARIES}
-	#${gst_LIBRARIES}
-#)
-
-# add_library(${PROJECT_NAME} src/pointcloudobstacles_to_scan.cpp)
-
-add_executable(pointcloudobstaclestoscan
-  src/pointcloudobstacles_to_scan.cpp
-)
-target_link_libraries(pointcloudobstaclestoscan
-	${catkin_LIBRARIES}
-)
+# add_executable(pointcloudobstaclestoscan
+  # src/pointcloudobstacles_to_scan.cpp
+# )
+# target_link_libraries(pointcloudobstaclestoscan
+	# ${catkin_LIBRARIES}
+# )
 
 add_executable(depthcamtoscan
   src/depthcamtoscan.cpp
