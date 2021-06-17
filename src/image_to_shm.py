@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 import os, shutil
@@ -69,7 +69,7 @@ def imgCallBack(data):
 	if os.path.exists(oldfile):
 		os.remove(oldfile)
 	
-	f = open(PATH+"/"+str(filenum), "w")
+	f = open(PATH+"/"+str(filenum), "wb")
 	f.write(data.data)
 	f.close()
 
@@ -83,6 +83,6 @@ rospy.init_node('image_to_shm', anonymous=False)
 rospy.loginfo("image_to_shm init")
 rospy.Subscriber(rospy.get_param('~camera_topic', 'camera/color/image_raw'), Image, imgCallBack) 
 rospy.on_shutdown(cleanup)
-print "using topic: "+rospy.get_param('~camera_topic', 'camera/color/image_raw')
+print ("using topic: "+rospy.get_param('~camera_topic', 'camera/color/image_raw'))
 
 rospy.spin()

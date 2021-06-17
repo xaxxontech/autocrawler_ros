@@ -1,5 +1,5 @@
-# oculusprimesocket.py module
-# make tcp socket connection with Oculus Prime robot, relay commands and messages 
+# PYTHON3 oculusprimesocket.py module
+# make tcp socket connection with xaxxon robot, relay commands and messages 
 
 """make tcp socket connection with Oculus Prime Server Application
 provide functions for relay of commands and messages"""
@@ -25,7 +25,7 @@ def sendString(s):
 
 	global connected
 	try:
-		sock.sendall(s+"\r\n")
+		sock.sendall((s+"\r\n").encode())
 	except socket.error: 
 		connected = False
 		if reconnect:
