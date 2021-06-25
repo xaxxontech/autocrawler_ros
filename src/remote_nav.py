@@ -213,6 +213,7 @@ def scanCallback(data):
 	scannum=0
 	scanpoints = data.ranges
 
+
 def sendScan():
 	global scanpoints
 	
@@ -235,6 +236,7 @@ def sendScan():
 		oculusprimesocket.sendString("messageclients remote_nav.py IndexError")
 		
 	oculusprimesocket.sendString(s)
+
 
 def cleanup():
 	oculusprimesocket.sendString("state delete roscurrentgoal")
@@ -308,8 +310,13 @@ if not rospy.is_shutdown():
 lasttext = ""
 
 while not rospy.is_shutdown():
+
+	#  rospy.loginfo("loop start");  #debug -- only occurs once at start then nothing 
 	
-	s = oculusprimesocket.replyBufferSearch("<state> (rosinitialpose|rossetgoal|rosgoalcancel|lidar) ")
+	s = oculusprimesocket.replyBufferSearch("<state> (rosinitialpose|rossetgoal|rosgoalcancel|lidar) ") # hangs if no match!
+
+	#  rospy.loginfo("loop made it to here");  #debug -- only occurs once at start then nothing 
+
 	if re.search("rosinitialpose", s):
 		oculusprimesocket.sendString("state delete rosinitialpose")
 		publishinitialpose(s.split()[2])
@@ -328,7 +335,7 @@ while not rospy.is_shutdown():
 	elif re.search("lidar", s):
 		lidarSetParam(s.split()[2])
 		
-		
+
 	t = rospy.get_time()
 	if t - lastsendinfo > sendinfodelay:
 		lastsendinfo = t
@@ -412,7 +419,6 @@ while not rospy.is_shutdown():
 				oculusprimesocket.sendString("state rosgoalstatus aborted")
 				oculusprimesocket.sendString("state delete roscurrentgoal")
 				goalseek = False
-		
 		
 	rospy.sleep(0.01) # non busy wait
 		
