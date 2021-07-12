@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 communicate between autocrawler java and robotis openmanipulator ros1
