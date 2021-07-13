@@ -69,8 +69,8 @@ def getJointPosition():
 
 def moveToFloor():
 	global rest
-	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
-	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+	rospy.wait_for_service('goal_joint_space_path')
+	set_joint_position = rospy.ServiceProxy('goal_joint_space_path', SetJointPosition)
 	
 	pos = getfileposition("floor")
 	if not pos: 
@@ -86,8 +86,8 @@ def moveToFloor():
 	
 def moveToHome():
 	global rest
-	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
-	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+	rospy.wait_for_service('goal_joint_space_path')
+	set_joint_position = rospy.ServiceProxy('goal_joint_space_path', SetJointPosition)
 	
 	pos = getfileposition("home")
 	if not pos: 
@@ -103,23 +103,23 @@ def moveToHome():
 	rest=False
 	
 def gripperopen():
-	rospy.wait_for_service('open_manipulator/goal_tool_control')
-	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_tool_control', SetJointPosition)
+	rospy.wait_for_service('goal_tool_control')
+	set_joint_position = rospy.ServiceProxy('goal_tool_control', SetJointPosition)
 	newjointpositions = getJointPosition()
 	newjointpositions.position[4] = 0.01
 	set_joint_position('', newjointpositions , 2)
 
 def gripperclose():
-	rospy.wait_for_service('open_manipulator/goal_tool_control')
-	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_tool_control', SetJointPosition)
+	rospy.wait_for_service('goal_tool_control')
+	set_joint_position = rospy.ServiceProxy('goal_tool_control', SetJointPosition)
 	newjointpositions = getJointPosition()
 	newjointpositions.position[4] = -0.01
 	set_joint_position('', newjointpositions , 2)	
 
 def armrest():
 	global rest
-	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
-	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+	rospy.wait_for_service('goal_joint_space_path')
+	set_joint_position = rospy.ServiceProxy('goal_joint_space_path', SetJointPosition)
 	
 	pos = getfileposition("rest")
 	if not pos: 
@@ -136,8 +136,8 @@ def armrest():
 
 def armForward():
 	global rest
-	rospy.wait_for_service('open_manipulator/goal_joint_space_path')
-	set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+	rospy.wait_for_service('goal_joint_space_path')
+	set_joint_position = rospy.ServiceProxy('goal_joint_space_path', SetJointPosition)
 	
 	pos = getfileposition("forward")
 	if not pos: 
@@ -263,7 +263,7 @@ def main(args=None):
 	global rest
 	
 	rospy.init_node('autocrawler_openmanipulator', anonymous=False)
-	rospy.Subscriber("open_manipulator/joint_states", JointState, jointCallback) 
+	rospy.Subscriber("joint_states", JointState, jointCallback) 
 	
 	oculusprimesocket.connect()	
 	oculusprimesocket.sendString("log autocrawler_openmanipulator.py connected")  
@@ -285,7 +285,7 @@ def main(args=None):
 				rospy.sleep(1.5)
 				armrest()
 				rospy.sleep(2)
-			os.system('rosnode kill /open_manipulator')
+			os.system('rosnode kill /open_manipulator_controller')
 			rospy.sleep(1)
 			oculusprimesocket.sendString("malgcommand Q")
 			oculusprimesocket.sendString("messageclients openmanipulator off")  
@@ -295,15 +295,15 @@ def main(args=None):
 		
 		elif re.search("arm enable", s): # enable servos
 			print("enable")
-			rospy.wait_for_service('open_manipulator/set_actuator_state')
-			set_actuator_state = rospy.ServiceProxy('open_manipulator/set_actuator_state', SetActuatorState)
+			rospy.wait_for_service('set_actuator_state')
+			set_actuator_state = rospy.ServiceProxy('set_actuator_state', SetActuatorState)
 			set_actuator_state(True)
 			oculusprimesocket.sendString("messageclients servos enabled")  
 			
 		elif re.search("arm disable", s): # disable servos macro 
 			print("disable")
-			rospy.wait_for_service('open_manipulator/set_actuator_state')
-			set_actuator_state = rospy.ServiceProxy('open_manipulator/set_actuator_state', SetActuatorState)
+			rospy.wait_for_service('set_actuator_state')
+			set_actuator_state = rospy.ServiceProxy('set_actuator_state', SetActuatorState)
 			#  if not rest:
 				#  moveToHome()
 				#  rospy.sleep(1.5)
@@ -348,8 +348,8 @@ def main(args=None):
 			
 			pos = getfileposition("user"+str(num))
 			if not pos == None:
-				rospy.wait_for_service('open_manipulator/goal_joint_space_path')
-				set_joint_position = rospy.ServiceProxy('open_manipulator/goal_joint_space_path', SetJointPosition)
+				rospy.wait_for_service('goal_joint_space_path')
+				set_joint_position = rospy.ServiceProxy('goal_joint_space_path', SetJointPosition)
 				newjointpositions = getJointPosition()
 				newjointpositions.position[0] = pos[0]
 				newjointpositions.position[1] = pos[1]
