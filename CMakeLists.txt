@@ -14,20 +14,17 @@ find_package(catkin REQUIRED COMPONENTS
 	image_transport
 	image_geometry
 	sensor_msgs
-	pcl_ros
 )
 
 find_package(PkgConfig)
 
 pkg_check_modules(gst gstreamer-1.0)
-#pkg_check_modules(gstbase gstreamer-base-1.0)
 pkg_check_modules(gstapp gstreamer-app-1.0)
 
 pkg_check_modules(gstsdp gstreamer-sdp-1.0)
 pkg_check_modules(gstwebrtc gstreamer-webrtc-1.0)
 pkg_check_modules(libsoup libsoup-2.4)
 pkg_check_modules(jsonglib json-glib-1.0)
-#pkg_check_modules(glib glib-2.0)
 
 
 #message(STATUS "inc: ${gst_INCLUDE_DIRS}")
@@ -88,13 +85,6 @@ target_link_libraries(webrtcrs
 	${gst_LIBRARIES}
 )
 
-
-# add_executable(pointcloudobstaclestoscan
-  # src/pointcloudobstacles_to_scan.cpp
-# )
-# target_link_libraries(pointcloudobstaclestoscan
-	# ${catkin_LIBRARIES}
-# )
 
 add_executable(depthcamtoscan
   src/depthcamtoscan.cpp
