@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 
-import rospy, oculusprimesocket, math, re, thread, time
+"""
+decipher ROS twist messages and send to autocrawler java as move commands 
+
+made to be used with:
+rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+"""
+
+import rospy, oculusprimesocket, math, re, threading, time
 from geometry_msgs.msg import Twist
 
 lastlinear = 0
@@ -17,7 +24,7 @@ def twistCallback(data):
 	angular = data.angular.z
 	
 	twistid = rospy.Time.now()
-	thread.start_new_thread(waitifnecessary, (linear, angular, twistid) )
+	threading.Thread(target=waitifnecessary, args=(linear, angular, twistid)).start()
 	# print twistid
 
 
@@ -56,7 +63,8 @@ def move(linear, angular):
 		cmd = "move stop"
 		
 	elif linear > 0 and angular == 0:
-		cmd = "forward "+d
+		#  cmd = "forward "+d
+		cmd = "move forward"
 		
 	elif linear < 0 and angular == 0:
 		cmd = "backward "+d
