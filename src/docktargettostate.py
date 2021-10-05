@@ -29,7 +29,7 @@ def transformCallback(data):
 			dockfound = False
 		return
 
-	xc = -(data.transforms[0].transform.translation.x + 0.018) # add bot/dock contacts offset actual is 0.024
+	xc = -(data.transforms[0].transform.translation.x + rospy.get_param('~dock_offset', 0.018)) # add bot/dock contacts offset actual is 0.024
 	zc = data.transforms[0].transform.translation.z
 	# camangle = math.atan(xc/zc)
 	baselinkangle = math.atan((xc+ybasecam)/(zc+xbasecam)) # target left,  should be positive

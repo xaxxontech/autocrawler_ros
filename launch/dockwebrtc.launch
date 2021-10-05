@@ -3,8 +3,11 @@
 	<node pkg="tf" type="static_transform_publisher" name="base_to_dockcam_broadcaster" 
 		args="-0.157 -0.003 0.080 3.14159 0 0 /base_link /dockcam 100" />
 		
-	<node pkg="autocrawler" type="docktargettostate.py" name="docktargettostate" required="true" output="screen"/>
-
+	<arg name="dockoffset" default="0.018"></arg>	
+	<node pkg="autocrawler" type="docktargettostate.py" name="docktargettostate" required="true" output="screen">
+		<param name="dock_offset" value="$(arg dockoffset)" />
+	</node>
+	
 	<arg name="dockdevice" default="/dev/video3" />
 	<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" required="true" >
 		<param name="video_device" value="$(arg dockdevice)" />
@@ -25,9 +28,6 @@
 			--video-height=480 --video-bitrate=256
 			--turnserver-login=$(arg turnserverlogin) --turnserver-port=$(arg turnserverport)"  
 		  respawn="true">
-<!--
-		<remap from="image_raw" to="/usb_cam/image_raw"/>
--->
 		<remap from="image_raw" to="/fiducial_images"/>
 
 	</node>
