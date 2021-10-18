@@ -347,7 +347,7 @@ static gboolean start_pipeline (void)
 {
   GstStateChangeReturn ret;
   GError *error = NULL;
-
+  
 	if(!audio_device) {
 		gchar *pl = g_strconcat ("webrtcbin bundle-policy=max-bundle name=sendrecv " STUN_SERVER
 			"turn-server=turn://", turnserver_login, "@127.0.0.1:", turnserver_port, " "

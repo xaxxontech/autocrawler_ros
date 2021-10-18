@@ -85,6 +85,16 @@ target_link_libraries(webrtcrs
 	${gst_LIBRARIES}
 )
 
+add_executable(recordrs
+  src/recordrealsense.cpp
+)
+
+target_link_libraries(recordrs
+	${catkin_LIBRARIES}
+	${gstapp_LIBRARIES}
+	${gst_LIBRARIES}
+)
+
 
 add_executable(depthcamtoscan
   src/depthcamtoscan.cpp

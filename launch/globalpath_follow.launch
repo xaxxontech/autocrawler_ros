@@ -9,10 +9,10 @@
 	</node>
 
 	<!-- lidar and realsense -->
-	<arg name="color_width" default="640"/>
-	<arg name="color_height" default="480"/>
-	<arg name="color_fps" default="15"/>
-	<include file="$(find autocrawler)/launch/lidarrealsense_merge.launch" />
+	<arg name="camscan" default="true"/>
+	<include file="$(find autocrawler)/launch/lidarrealsense_merge.launch" >
+		<arg name="camscan" value="$(arg camscan)"/>
+	</include>
 
 	<node pkg="autocrawler" type="arcmove_globalpath_follower.py" name="arcmove_globalpath_follower" output="screen"
 		required="true" /> 

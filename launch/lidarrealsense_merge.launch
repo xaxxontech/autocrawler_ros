@@ -14,8 +14,10 @@
 	<node pkg="autocrawler" type="depthcamtoscan" name="depthcamtoscan" output="screen" required="false"/>
 
 	<!-- scan merge -->
+	<arg name="camscan" default="true" />
 	<node pkg="autocrawler" type="lidarrealsensemerge.py" name="lidarrealsensemerge" required="true" output="screen">
 		<param name="merged_scan_topic" value="scan"/> 
+		<param name="cam_scan" value="$(arg camscan)" />
 	</node>
 	
 </launch>

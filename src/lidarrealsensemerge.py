@@ -15,10 +15,6 @@ scansmerged = False
 CAMCOMP = 1.08 			# scale cam points to match <=2m lidar points
 
 
-def cleanup():
-	pass
-	
-	
 def mergescans(lidarscandata):
 	global camscans, scansmerged
 	
@@ -114,6 +110,9 @@ def lidarScanCallback(data):
 def camScanCallback(data):
 	global camscans, camrangeslength, camanglestart
 	
+	if not rospy.get_param('~cam_scan', "true"):
+		return
+		
 	if camrangeslength == -1: # set once
 		camrangeslength = len(data.ranges)
 		camanglestart = math.pi*2 + data.angle_min
@@ -123,7 +122,6 @@ def camScanCallback(data):
 	
 # main	
 rospy.init_node('lidarrealsensemerge', anonymous=False)
-rospy.on_shutdown(cleanup)
 rospy.loginfo("lidarrealsensemerge init")
 scan_pub = rospy.Publisher(rospy.get_param('~merged_scan_topic', 'scan'), LaserScan, queue_size=3)
 rospy.Subscriber(rospy.get_param('~lidar_scan_topic', 'scan_lidar'), LaserScan, lidarScanCallback) 
