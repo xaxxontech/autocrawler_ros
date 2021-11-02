@@ -1,6 +1,5 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-# from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
 
@@ -17,25 +16,25 @@ def generate_launch_description	():
 	
 	return LaunchDescription([
 
-        Node(
-            package='autocrawler',
-            node_executable='webrtcrs',
-            node_name='webrtcrs',
-            output='screen',
-			emulate_tty=True,
+		Node(
+			package='autocrawler',
+			executable='webrtcrs',
+			name='webrtcrs',
+			output='screen',
+			emulate_tty=True, # (for python print output to screen)
 			arguments = [peerid, webrtcserver, audiodevice, videowidth, videoheight,
 				videobitrate, turnserverport, turnserverlogin],
-            remappings=[
-                ('/image_raw', '/camera/color/image_raw'),
-            ],
-        ),
-		
+			# remappings=[
+				# ('/image_raw', '/camera/color/image_raw'),
+			# ]
+		),
+
 		Node(
-            package='autocrawler',
-            node_executable='webrtc_status_listener.py',
-            node_name='webrtc_status_listener',
-            output='screen',
+			package='autocrawler',
+			executable='webrtc_status_listener.py',
+			name='webrtc_status_listener',
+			output='screen',
 			emulate_tty=True,
-        )
-    ])
+		)
+	])
 

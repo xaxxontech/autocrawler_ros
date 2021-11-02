@@ -29,7 +29,7 @@ def main(args=None):
 	rclpy.spin(node)
 			
 	node.get_logger().info("webrtc_status_listener Exiting");
-    rclpy.shutdown()
+	rclpy.shutdown()
 
 
 if __name__ == '__main__':

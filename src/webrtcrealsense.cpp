@@ -28,7 +28,7 @@
 #include <memory>
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "image_transport/image_transport.h" 
+#include "image_transport/image_transport.hpp" 
 #include "sensor_msgs/image_encodings.hpp"
 #include <thread>
 
@@ -62,6 +62,8 @@ static AppState app_state = APP_STATE_UNKNOWN;
 static const gchar *peer_id = nullptr;
 static const gchar *server_url = "wss://127.0.0.1:8443";
 static gboolean disable_ssl = FALSE;
+static const gchar *dummy = "asdf";
+
 
 // added
 namespace enc = sensor_msgs::image_encodings;  // ROS1
@@ -782,7 +784,7 @@ check_plugins (void)
   return ret;
 }
 
-GstCaps* gst_caps_new_from_image(const sensor_msgs::msg::Image::ConstPtr &msg)
+GstCaps* gst_caps_new_from_image(const sensor_msgs::msg::Image::ConstSharedPtr &msg)
 {
 	// http://gstreamer.freedesktop.org/data/doc/gstreamer/head/pwg/html/section-types-definitions.html
 	static const std::map<std::string, std::string> known_formats = {{
@@ -817,7 +819,7 @@ GstCaps* gst_caps_new_from_image(const sensor_msgs::msg::Image::ConstPtr &msg)
 			nullptr);
 }
 
-GstSample* gst_sample_new_from_image(const sensor_msgs::msg::Image::ConstPtr &msg)
+GstSample* gst_sample_new_from_image(const sensor_msgs::msg::Image::ConstSharedPtr &msg)
 {
 	auto buffer = gst_buffer_new_allocate(nullptr, msg->data.size(), nullptr);
 	g_assert(buffer);
@@ -856,10 +858,11 @@ void startLoopAndConnect() {
 		});
 }
 
-void image_cb(const sensor_msgs::msg::Image::ConstPtr &msg)
+void image_cb(const sensor_msgs::msg::Image::ConstSharedPtr &msg)
 {
 	// ROS_INFO("Image: %d x %d, stamp %f", msg->width, msg->height, msg->header.stamp.toSec());
 	if (!serverConnectStarted) {
+		RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "webrtcrs image frame received");
 		startLoopAndConnect();
 		return;
 	}
@@ -883,7 +886,7 @@ int main(int argc, char** argv)
 	RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "INIT webrtcrs");
 	
 	image_transport_.reset(new image_transport::ImageTransport(node)); 
-	image_sub_ = image_transport_->subscribe("/image_raw", 10, image_cb); 
+	image_sub_ = image_transport_->subscribe("/color/image_raw", 10, image_cb); 
 	
 	GOptionContext *context;
 	GError *error = NULL;
