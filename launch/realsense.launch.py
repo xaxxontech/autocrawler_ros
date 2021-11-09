@@ -1,6 +1,6 @@
 
 
-from launch import LaunchDescription
+import launch
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
 
@@ -13,7 +13,7 @@ def generate_launch_description	():
 	enabledepth = LaunchConfiguration('enable_depth', default='true')
 	initialreset = LaunchConfiguration('initial_reset', default='false') 
 
-	return LaunchDescription([
+	return launch.LaunchDescription([
 
 		Node(
 			package='tf2_ros',
@@ -32,10 +32,9 @@ def generate_launch_description	():
 				'color_height': colorheight,
 				'color_fps': colorfps,
 				'enable_depth': enabledepth,
-				'initial_reset': True,
+				'initial_reset': initialreset,
 			}]
-
-		)
+		),
 	])
 
 

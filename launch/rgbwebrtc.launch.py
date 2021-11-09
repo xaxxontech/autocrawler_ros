@@ -24,9 +24,9 @@ def generate_launch_description	():
 			emulate_tty=True, # (for python print output to screen)
 			arguments = [peerid, webrtcserver, audiodevice, videowidth, videoheight,
 				videobitrate, turnserverport, turnserverlogin],
-			# remappings=[
-				# ('/image_raw', '/camera/color/image_raw'),
-			# ]
+			remappings=[
+				('/image_raw', '/color/image_raw'),
+			]
 		),
 
 		Node(

@@ -67,17 +67,22 @@ target_link_libraries(webrtcrs
 
 install(TARGETS
   webrtcrs
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+ )
 # ---- end of required for webrtcrealsense.cpp ----
 
 
 install(DIRECTORY
   launch
+  config
   DESTINATION share/${PROJECT_NAME}/
 )
 
 install(PROGRAMS
   ${PROJECT_NAME}/webrtc_status_listener.py
+  ${PROJECT_NAME}/docktargettostate.py
+  ${PROJECT_NAME}/image_to_shm.py
+  ${PROJECT_NAME}/odom_tf.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

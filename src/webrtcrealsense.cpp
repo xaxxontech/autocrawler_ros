@@ -886,7 +886,7 @@ int main(int argc, char** argv)
 	RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "INIT webrtcrs");
 	
 	image_transport_.reset(new image_transport::ImageTransport(node)); 
-	image_sub_ = image_transport_->subscribe("/color/image_raw", 10, image_cb); 
+	image_sub_ = image_transport_->subscribe("/image_raw", 10, image_cb); 
 	
 	GOptionContext *context;
 	GError *error = NULL;

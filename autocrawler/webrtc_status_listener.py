@@ -26,10 +26,10 @@ def main(args=None):
 	
 	node.get_logger().info("webrtc_status_listener ready");
 
-	rclpy.spin(node)
-			
-	node.get_logger().info("webrtc_status_listener Exiting");
-	rclpy.shutdown()
+	try:
+		rclpy.spin(node)
+	except KeyboardInterrupt: 
+		node.get_logger().info("exiting");
 
 
 if __name__ == '__main__':
