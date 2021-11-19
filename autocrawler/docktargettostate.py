@@ -32,11 +32,10 @@ transforms:
 
 
 import rclpy
-
+import tf_transformations
 from tf2_ros import TransformException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
-
 from fiducial_msgs.msg import FiducialTransformArray 
 import autocrawler.oculusprimesocket as oculusprimesocket
 import math
@@ -49,27 +48,27 @@ xbasecam = None
 ybasecam = None
 
 # from https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/ 
-def euler_from_quaternion(x, y, z, w):
-        """
-        Convert a quaternion into euler angles (roll, pitch, yaw)
-        roll is rotation around x in radians (counterclockwise)
-        pitch is rotation around y in radians (counterclockwise)
-        yaw is rotation around z in radians (counterclockwise)
-        """
-        t0 = +2.0 * (w * x + y * z)
-        t1 = +1.0 - 2.0 * (x * x + y * y)
-        roll_x = math.atan2(t0, t1)
+# def euler_from_quaternion(x, y, z, w):
+        # """
+        # Convert a quaternion into euler angles (roll, pitch, yaw)
+        # roll is rotation around x in radians (counterclockwise)
+        # pitch is rotation around y in radians (counterclockwise)
+        # yaw is rotation around z in radians (counterclockwise)
+        # """
+        # t0 = +2.0 * (w * x + y * z)
+        # t1 = +1.0 - 2.0 * (x * x + y * y)
+        # roll_x = math.atan2(t0, t1)
      
-        t2 = +2.0 * (w * y - z * x)
-        t2 = +1.0 if t2 > +1.0 else t2
-        t2 = -1.0 if t2 < -1.0 else t2
-        pitch_y = math.asin(t2)
+        # t2 = +2.0 * (w * y - z * x)
+        # t2 = +1.0 if t2 > +1.0 else t2
+        # t2 = -1.0 if t2 < -1.0 else t2
+        # pitch_y = math.asin(t2)
      
-        t3 = +2.0 * (w * z + x * y)
-        t4 = +1.0 - 2.0 * (y * y + z * z)
-        yaw_z = math.atan2(t3, t4)
+        # t3 = +2.0 * (w * z + x * y)
+        # t4 = +1.0 - 2.0 * (y * y + z * z)
+        # yaw_z = math.atan2(t3, t4)
      
-        return roll_x, pitch_y, yaw_z # in radians
+        # return roll_x, pitch_y, yaw_z # in radians
         
 
 def transformCallback(data):
@@ -98,7 +97,8 @@ def transformCallback(data):
 					data.transforms[0].transform.rotation.y,
 					data.transforms[0].transform.rotation.z,
 					data.transforms[0].transform.rotation.w)
-	euler = euler_from_quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+	# euler = euler_from_quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+	euler = tf_transformations.euler_from_quaternion(quaternion)
 	targetpitch = euler[1] # TODO: this is to dockcam, should be to base_link
 		
 	dockmetrics = "{0:.4f}".format(baselinkdistance) + " "

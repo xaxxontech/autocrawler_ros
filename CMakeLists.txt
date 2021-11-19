@@ -75,6 +75,7 @@ install(TARGETS
 install(DIRECTORY
   launch
   config
+  maps
   DESTINATION share/${PROJECT_NAME}/
 )
 
@@ -83,6 +84,7 @@ install(PROGRAMS
   ${PROJECT_NAME}/docktargettostate.py
   ${PROJECT_NAME}/image_to_shm.py
   ${PROJECT_NAME}/odom_tf.py
+  ${PROJECT_NAME}/map_remote.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
