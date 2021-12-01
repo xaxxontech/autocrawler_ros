@@ -9,9 +9,14 @@ def generate_launch_description	():
 
 	colorwidth = LaunchConfiguration('color_width', default='640')
 	colorheight = LaunchConfiguration('color_height', default='480')
-	colorfps = LaunchConfiguration('color_fps', default='15')
+	colorfps = LaunchConfiguration('color_fps'+'.0', default='15.0')
 	enabledepth = LaunchConfiguration('enable_depth', default='true')
 	initialreset = LaunchConfiguration('initial_reset', default='false') 
+	
+	enableinfra = False
+	if LaunchConfiguration('enable_depth') == 'true':
+		enableinfra = True
+		
 
 	return launch.LaunchDescription([
 
@@ -33,6 +38,8 @@ def generate_launch_description	():
 				'color_fps': colorfps,
 				'enable_depth': enabledepth,
 				'initial_reset': initialreset,
+				'enable_infra1': enableinfra,
+				'enable_infra2': enableinfra,
 			}]
 		),
 	])

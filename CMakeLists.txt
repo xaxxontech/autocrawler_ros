@@ -85,6 +85,7 @@ install(PROGRAMS
   ${PROJECT_NAME}/image_to_shm.py
   ${PROJECT_NAME}/odom_tf.py
   ${PROJECT_NAME}/map_remote.py
+  ${PROJECT_NAME}/nav.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

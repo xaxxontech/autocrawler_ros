@@ -3,7 +3,6 @@
 import rclpy
 import os, struct, time
 from nav_msgs.msg import OccupancyGrid
-from sensor_msgs.msg import LaserScan
 import autocrawler.oculusprimesocket as oculusprimesocket
 import tf_transformations
 
@@ -70,7 +69,7 @@ def main(args=None):
 	try:
 		rclpy.spin(node)
 	except KeyboardInterrupt: 
-		cleanup()  
+		pass 
 
 	
 if __name__ == '__main__':

@@ -2,6 +2,8 @@ import os
 from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
 
@@ -25,15 +27,6 @@ def generate_launch_description():
 		),
 		
 		Node(
-			package='autocrawler',
-			executable='map_remote.py',
-			name="map_remote",
-			output='screen',
-			emulate_tty=True,
-		),
-		
-		# add rotated laser frame broadcaster etc
-		Node(
 			package='tf2_ros',
 			executable='static_transform_publisher',
 			name='base_to_lidar_broadcaster',
@@ -42,23 +35,24 @@ def generate_launch_description():
 		),
 		
 		Node(
-			package='cartographer_ros',
-			executable='cartographer_node',
-			name='cartogapher_node',
+			package='tf2_ros',
+			executable='static_transform_publisher',
+			name='link_to_footprint_broadcaster',
 			output='screen',
-			parameters=[{'use_sim_time': False}],
-			arguments=['-configuration_directory', os.path.join(get_package_share_directory('autocrawler'), 'config'),
-				'-configuration_basename', 'cartographer.lua'],
+			arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', "base_link", "base_footprint"]
 		),
 		
-		Node(
-			package='cartographer_ros',
-			executable='occupancy_grid_node',
-			name='occupancy_grid_node',
-			output='screen',
-			parameters=[{'use_sim_time': False}],
-			arguments=['-resolution', '0.05', '-publish_period_sec', '1.0'],
-		),
+		IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(get_package_share_directory('nav2_bringup'), 
+				'launch'), '/bringup_launch.py']),
+            launch_arguments={
+                'map': os.path.join(
+					get_package_share_directory('autocrawler'), 'maps', 'map.yaml'),
+                'use_sim_time': 'false',
+                'params_file': os.path.join(
+					get_package_share_directory('autocrawler'),
+					'config', 'nav_params.yaml')
+			}.items(),
+        ),
 
 	])
-

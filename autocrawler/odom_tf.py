@@ -18,7 +18,7 @@ import time
 pos = [0.0, 0.0, 0.0]
 before = 0
 now = 0
-LAG = 0.035  
+LAG = 0.0 #0.035  
 node = None
 br = None
 odom_pub = None
@@ -106,13 +106,12 @@ def main(args=None):
 	broadcast("* * 0 0".split()) # broadcast zero odometry baseline
 		
 	while True:
-		try:
-			s = oculusprimesocket.waitForReplySearch("<state> distanceangle ")
-			if not s=="":
-				broadcast(s.split())
+		s = oculusprimesocket.waitForReplySearch("<state> distanceangle ")
+		if not s=="":
+			broadcast(s.split())
 
+		try:
 			rclpy.spin_once(node, timeout_sec=0.01)
-			
 		except KeyboardInterrupt: 
 			cleanup() 
 			break
