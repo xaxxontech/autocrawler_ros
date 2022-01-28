@@ -24,14 +24,14 @@
 	<arg name="turnserverlogin" default="user:pass"/>
 	<arg name="turnserverport" default="3478"/>
 	<node name="webrtcrs" pkg="autocrawler" type="webrtcrs" output="screen" 
-		  args="--peer-id=$(arg peerid) --video-width=640 --server=$(arg webrtcserver)
-			--video-height=480 --video-bitrate=256
-			--turnserver-login=$(arg turnserverlogin) --turnserver-port=$(arg turnserverport)"  
+			args="$(arg peerid)  $(arg webrtcserver)
+			--video-width=640 --video-height=480 --video-bitrate=256
+		    $(arg turnserverlogin) $(arg turnserverport)" 
 		  respawn="true">
 		<remap from="image_raw" to="/fiducial_images"/>
-
 	</node>
-
+	
+	
 	<node pkg="autocrawler" type="webrtc_status_listener.py" name="webrtc_status_listener" required="true" output="screen" />
 	
 	<arg name="camera" default="/usb_cam"/>

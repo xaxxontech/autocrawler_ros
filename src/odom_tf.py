@@ -59,8 +59,8 @@ def broadcast(s):
 
 	#set the velocity
 	odom.child_frame_id = "base_link"
-	odom.twist.twist.linear.x = distance / dt
-	odom.twist.twist.linear.y = 0
+	odom.twist.twist.linear.x = delta_x / dt  # was distance/dt
+	odom.twist.twist.linear.y = delta_y / dt  # was 0.0
 	odom.twist.twist.linear.z = 0
 	odom.twist.twist.angular.x = 0
 	odom.twist.twist.angular.y = 0

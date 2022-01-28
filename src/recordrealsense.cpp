@@ -53,7 +53,7 @@ static gboolean configure_pipeline (void)
 		"videorate ! video/x-raw,width=", video_width, ",height=", video_height, ",framerate=15/1 ! "
 		"videoconvert ! queue ! x264enc tune=zerolatency bitrate=512 ! "
 		"mux. alsasrc device=hw:", audio_device, " ! "
-		"queue ! audioconvert ! audioresample quality=2 ! voaacenc ! aacparse ! 3gppmux name=mux ! "
+		"queue ! audioconvert ! audioresample quality=2 ! voaacenc tolerance=9223372036854775807 ! aacparse ! 3gppmux name=mux ! "
 		"filesink location=", record_path, " sync=false"
 		, NULL);
 		
